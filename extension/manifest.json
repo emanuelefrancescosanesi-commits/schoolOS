@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "SchoolOS · Importa voti",
+  "version": "0.1.0",
+  "description": "Legge la pagina del registro già aperta e porta i voti in SchoolOS. Nessuna password, nessun server intermedio.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": { "default_title": "Importa in SchoolOS", "default_popup": "popup.html" },
+  "options_page": "options.html",
+  "browser_specific_settings": { "gecko": { "id": "importa-voti@schoolos.invalid" } }
+}
