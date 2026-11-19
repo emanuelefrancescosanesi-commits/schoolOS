@@ -188,7 +188,7 @@ Le scelte non sono fisse: ogni utente le sceglie nell'onboarding e le può cambi
 | Periodi | Trimestri; trimestre + pentamestre; quadrimestri | Righe di `periods` con le date scelte dall'utente |
 | Metodo di media | Aritmetica o pesata | Calcoli in `lib/domain/` |
 
-Tutto si appoggia sui campi già previsti in `profiles` e `periods`: la configurazione cambia i dati, non il codice. Per questo ogni calcolo legge la scala e i periodi dal profilo e non assume né i decimi né un numero fisso di periodi. Un "+" vale per esempio 0,25 e un "−" vale −0,25; il valore è una proposta da confermare.
+Tutto si appoggia sui campi già previsti in `profiles` e `periods`: la configurazione cambia i dati, non il codice. Per questo ogni calcolo legge la scala e i periodi dal profilo e non assume né i decimi né un numero fisso di periodi. Un "+" vale +0,25 e un "−" vale −0,25 (confermato da Emanuele il 19 nov 2026).
 
 ## Chatbot di supporto
 
