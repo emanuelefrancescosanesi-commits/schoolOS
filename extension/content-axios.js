@@ -57,11 +57,17 @@ function report(probe) {
   }
 }
 
-async function probeFromHome() {
+const MIN_GAP_MS = 6 * 60 * 60 * 1000; // dalla home: al massimo ogni 6 ore, senza polling
+
+async function probeFromHome(force) {
   if (probing || !chrome.runtime || !chrome.runtime.id) return;
   if (document.querySelector("table.rdoc_full_valutazioni")) return; // già nella pagina voti
   const tile = votiTile();
   if (!tile) return;
+  if (!force) {
+    const { probe: last } = await chrome.storage.local.get("probe");
+    if (last && last.grid && Date.now() - last.at < MIN_GAP_MS) return;
+  }
   probing = true;
   const probe = { at: Date.now(), tile: true };
   try {
@@ -89,10 +95,10 @@ async function probeFromHome() {
 }
 
 // La home di Axios carica i riquadri a pagina aperta: si riprova quando cambia, e su richiesta.
-setTimeout(probeFromHome, 2500);
+setTimeout(() => probeFromHome(false), 2500);
 try {
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg && msg.type === "refresh") void probeFromHome();
+    if (msg && msg.type === "refresh") void probeFromHome(true);
   });
 } catch {
   /* script orfano */

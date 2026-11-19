@@ -6,8 +6,18 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg && msg.type === "probe" && msg.probe) void chrome.storage.local.set({ probe: msg.probe });
 });
 
-// Ogni 10 minuti chiede alle schede Axios aperte di rileggere i voti (sessione già attiva).
-chrome.alarms.create("refresh", { periodInMinutes: 10 });
+// Una volta al giorno (alle 14:00) chiede alle schede Axios aperte di rileggere i voti.
+// Serve una scheda Axios con la sessione ancora attiva; altrimenti si legge alla prossima apertura.
+const REFRESH_HOUR = 14;
+function nextRefresh() {
+  const d = new Date();
+  d.setHours(REFRESH_HOUR, 0, 0, 0);
+  if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1);
+  return d.getTime();
+}
+chrome.alarms.get("refresh").then((a) => {
+  if (!a) chrome.alarms.create("refresh", { when: nextRefresh(), periodInMinutes: 24 * 60 });
+});
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== "refresh") return;
   const tabs = await chrome.tabs.query({ url: "https://*.axioscloud.it/*" });
