@@ -5,6 +5,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { addGrade, deleteGrade, restoreGrade } from "@/app/(app)/grades/actions";
 import { EmptyState, SubjectDot } from "@/components/dashboard/widget-card";
+import { ImportCard } from "@/components/grades/import-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,6 +141,8 @@ export function GradesView(props: Props) {
           subjects={subjects}
           onAdded={(g) => setGrades((gs) => [...gs, g])}
         />
+
+        {!demo && subjects.length > 0 && <ImportCard today={props.today} scale={scale} subjects={subjects} />}
 
         {perSubject.length === 0 ? (
           <EmptyState icon={GraduationCapIcon}>{subjects.length === 0 ? m.noSubjects : m.empty}</EmptyState>

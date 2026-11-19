@@ -126,6 +126,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       complete_onboarding: { Args: { payload: Json }; Returns: string };
+      consume_ai_quota: { Args: { p_kind: string; p_limit: number }; Returns: boolean };
     };
     Enums: {
       period_scheme: PeriodScheme;
