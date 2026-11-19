@@ -14,12 +14,14 @@ document.getElementById("go").addEventListener("click", async () => {
     const { appUrl = DEFAULT_APP } = await chrome.storage.sync.get("appUrl");
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) throw new Error("Nessuna scheda attiva.");
-    const [res] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: extract,
-      args: [MAX_CHARS],
-    });
-    const text = res && res.result;
+    // Axios: la griglia materia × data si legge dalla struttura; altrimenti testo semplice.
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["axios.js"] });
+    const [axios] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => axiosToText(document) });
+    let text = axios && axios.result;
+    if (!text) {
+      const [res] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: extract, args: [MAX_CHARS] });
+      text = res && res.result;
+    }
     if (!text) throw new Error("Non trovo testo in questa pagina.");
     const base = appUrl.replace(/\/$/, "");
     await chrome.tabs.create({ url: `${base}/grades#import=${encodeURIComponent(text)}` });

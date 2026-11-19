@@ -82,3 +82,24 @@ secondo grado
     expect(parseRegistroText("", ctx)).toEqual([]);
   });
 });
+
+describe("testo prodotto dall'estensione per Axios", () => {
+  it("legge materia, data completa, tipo e voto con virgola", () => {
+    const text = `ITALIANO
+27/10/2026 Scritto 8
+
+MATEMATICA
+29/09/2026 Scritto 7
+
+SCIENZE MOTORIE
+14/10/2026 Pratico 8,00
+14/10/2026 Pratico 9,50`;
+    const rows = parseRegistroText(text, { subjectNames: ["Italiano", "Matematica", "Scienze motorie"] });
+    expect(rows.map((r) => [r.subject, r.value, r.date, r.kind])).toEqual([
+      ["Italiano", "8", "2026-10-27", "written"],
+      ["Matematica", "7", "2026-09-29", "written"],
+      ["Scienze motorie", "8,00", "2026-10-14", "practical"],
+      ["Scienze motorie", "9,50", "2026-10-14", "practical"],
+    ]);
+  });
+});
