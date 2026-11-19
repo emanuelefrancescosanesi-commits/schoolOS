@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   title: { default: m.meta.appName, template: `%s · ${m.meta.appName}` },
   description: m.meta.tagline,
   applicationName: m.meta.appName,
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: m.meta.appName, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
