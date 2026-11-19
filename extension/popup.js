@@ -59,3 +59,19 @@ chrome.storage.local.get("lastSync").then(({ lastSync }) => {
   if (lastSync.unmatched && lastSync.unmatched.length) msg.textContent += `. Materie non trovate in SchoolOS: ${lastSync.unmatched.join(", ")}`;
 });
 chrome.action.setBadgeText({ text: "" });
+
+// Diagnostica: versione, collegamento e se la scheda attiva è la griglia voti di Axios.
+(async () => {
+  const el = document.getElementById("diag");
+  const { token } = await chrome.storage.local.get("token");
+  let page = "scheda non leggibile";
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["axios.js"] });
+    const [r] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => axiosToSyncRows(document) });
+    page = r && r.result ? `griglia Axios trovata (${r.result.length} voti)` : "nessuna griglia Axios in questa scheda";
+  } catch {
+    /* scheda senza permesso: resta «non leggibile» */
+  }
+  el.textContent = `v${chrome.runtime.getManifest().version} · ${token ? "collegata a SchoolOS" : "NON collegata (manca il codice)"} · ${page}`;
+})();
