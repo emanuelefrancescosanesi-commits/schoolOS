@@ -95,7 +95,7 @@ async function main() {
   const ins = await a.sb
     .from("grades")
     .insert([
-      { subject_id: subjA[0].id, value: 7.25, kind: "written", graded_on: "2026-10-05" },
+      { subject_id: subjA[0].id, value: 7.25, kind: "written", graded_on: "2026-10-05", weight: 1 },
       { subject_id: subjA[1].id, value: 6.5, kind: "oral", graded_on: "2026-10-12", weight: 0.5 },
     ])
     .select("*");
