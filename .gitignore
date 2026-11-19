@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .recall/
+
+# asset OCR copiati da node_modules (scripts/copy-ocr-assets.mjs)
+/public/ocr

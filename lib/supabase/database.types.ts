@@ -18,6 +18,7 @@ type Table<Row, Insert, Update = Partial<Insert>> = {
 export type PeriodScheme = "trimestri" | "trimestre-pentamestre" | "quadrimestri";
 export type AverageMethodDb = "arithmetic" | "weighted";
 export type RegistroProviderDb = "classeviva" | "argo" | "axios" | "altro" | "nessuno";
+export type PlanDb = "free" | "pro";
 export type GradeKindDb = "written" | "oral" | "practical";
 export type AssignmentKindDb = "test" | "oral" | "homework" | "project";
 export type AssignmentStatusDb = "todo" | "done";
@@ -38,6 +39,7 @@ export type ProfileRow = {
   average_method: AverageMethodDb;
   dashboard_layout: Json | null;
   onboarding_completed_at: string | null;
+  plan: PlanDb;
   created_at: string;
   updated_at: string;
 };
@@ -112,7 +114,7 @@ export type Database = {
       profiles: Table<
         ProfileRow,
         { id: string },
-        Partial<Omit<ProfileRow, "id" | "onboarding_completed_at" | "created_at" | "updated_at">>
+        Partial<Omit<ProfileRow, "id" | "onboarding_completed_at" | "plan" | "created_at" | "updated_at">>
       >;
       school_years: Table<SchoolYearRow, Insertable<Omit<SchoolYearRow, Generated>, "label" | "starts_on" | "ends_on">>;
       periods: Table<
@@ -126,6 +128,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       complete_onboarding: { Args: { payload: Json }; Returns: string };
+      consume_ai_quota: { Args: { p_kind: string; p_limit: number }; Returns: boolean };
     };
     Enums: {
       period_scheme: PeriodScheme;
@@ -134,6 +137,7 @@ export type Database = {
       grade_kind: GradeKindDb;
       assignment_kind: AssignmentKindDb;
       assignment_status: AssignmentStatusDb;
+      plan: PlanDb;
     };
     CompositeTypes: { [_ in never]: never };
   };

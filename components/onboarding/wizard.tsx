@@ -355,7 +355,7 @@ function SubjectsStep({ data, setData }: StepProps) {
               aria-pressed={on}
               onClick={() => toggle(name)}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors",
+                "inline-flex h-8 pointer-coarse:h-10 items-center gap-1.5 rounded-full border px-3 text-sm transition-colors",
                 on ? "border-accent bg-accent-soft text-accent-text" : "border-border text-fg hover:bg-surface-2",
               )}
             >
@@ -408,7 +408,7 @@ function SubjectsStep({ data, setData }: StepProps) {
                     setSubjects(subjects.map((x, j) => (j === i ? { ...x, color: (x.color % 8) + 1 } : x)))
                   }
                   aria-label={m.changeColor(s.name)}
-                  className="inline-flex size-7 items-center justify-center rounded-control hover:bg-surface-2"
+                  className="inline-flex size-7 pointer-coarse:size-10 items-center justify-center rounded-control hover:bg-surface-2"
                 >
                   <SubjectDot color={s.color} className="size-3" />
                 </button>

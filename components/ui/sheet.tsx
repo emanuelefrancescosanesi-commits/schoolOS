@@ -31,7 +31,7 @@ export function SheetContent({
       >
         {children}
         <SheetPrimitive.Close
-          className="absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
+          className="absolute top-3 right-3 inline-flex size-9 pointer-coarse:size-11 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
           aria-label={closeLabel}
         >
           <XIcon className="size-4" />

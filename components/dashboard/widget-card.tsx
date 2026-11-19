@@ -35,7 +35,7 @@ export function WidgetCard({
           {href && (
             <Link
               href={href}
-              className="inline-flex h-7 items-center gap-1 rounded-control px-2 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-fg"
+              className="inline-flex h-7 pointer-coarse:h-10 items-center gap-1 rounded-control px-2 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-fg"
             >
               {m.common.seeAll}
               <ArrowUpRightIcon className="size-3.5" aria-hidden />

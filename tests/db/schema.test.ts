@@ -90,6 +90,14 @@ describe.skipIf(!url)("schema e RLS", () => {
       ).rejects.toThrow(/permission denied/);
     });
 
+    it("il client non può passare da solo al piano Pro, e i nuovi utenti partono dal gratuito", async () => {
+      await expect(
+        db.asUser(alice, (q) => q("update public.profiles set plan = 'pro' where id = $1", [alice])),
+      ).rejects.toThrow(/permission denied/);
+      const res = await db.asUser(alice, (q) => q<{ plan: string }>("select plan from public.profiles"));
+      expect(res.rows[0].plan).toBe("free");
+    });
+
     it("gli utenti anonimi non leggono nulla", async () => {
       await expect(db.asAnon((q) => q("select * from public.profiles"))).rejects.toThrow(/permission denied/);
       await expect(db.asAnon((q) => q("select * from public.grades"))).rejects.toThrow(/permission denied/);
