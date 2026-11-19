@@ -6,8 +6,8 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg && msg.type === "probe" && msg.probe) void chrome.storage.local.set({ probe: msg.probe });
 });
 
-// Ogni 30 minuti chiede alle schede Axios aperte di rileggere i voti (sessione già attiva).
-chrome.alarms.create("refresh", { periodInMinutes: 30 });
+// Ogni 10 minuti chiede alle schede Axios aperte di rileggere i voti (sessione già attiva).
+chrome.alarms.create("refresh", { periodInMinutes: 10 });
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== "refresh") return;
   const tabs = await chrome.tabs.query({ url: "https://*.axioscloud.it/*" });

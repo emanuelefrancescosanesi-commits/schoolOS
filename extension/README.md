@@ -14,7 +14,7 @@ Apri la pagina dei voti del registro, clicca l'icona, «Importa questa pagina».
 Solo `activeTab` (la scheda su cui clicchi), `scripting` e `storage` (l'indirizzo dell'app). Nessun accesso ai siti in background.
 
 ## Limiti
-Solo PC. Sincronizzazione automatica solo su Axios: quando apri la pagina voti, oppure dalla schermata iniziale (l'estensione chiede la pagina «Voti» con la sessione già aperta) e ogni 30 minuti finché una scheda Axios resta aperta. Non funziona con il registro chiuso: la sessione serve. Chrome/Edge; Firefox da adattare.
+Solo PC. Sincronizzazione automatica solo su Axios: quando apri la pagina voti, oppure dalla schermata iniziale (l'estensione chiede la pagina «Voti» con la sessione già aperta) e ogni 10 minuti finché una scheda Axios resta aperta. Non funziona con il registro chiuso: la sessione serve. Chrome/Edge; Firefox da adattare.
 
 ## Sincronizzazione automatica (Axios)
 1. In SchoolOS: Voti → Importa dal registro → «Collega l'estensione» → crea il codice.
