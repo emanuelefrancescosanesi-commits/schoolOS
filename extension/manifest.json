@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SchoolOS · Importa voti",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Legge la pagina voti del registro e li porta in SchoolOS. Nessuna password, nessun server intermedio.",
   "permissions": [
     "activeTab",
