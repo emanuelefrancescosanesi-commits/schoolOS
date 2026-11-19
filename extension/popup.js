@@ -75,3 +75,17 @@ chrome.action.setBadgeText({ text: "" });
   }
   el.textContent = `v${chrome.runtime.getManifest().version} · ${token ? "collegata a SchoolOS" : "NON collegata (manca il codice)"} · ${page}`;
 })();
+
+// Lettura dalla schermata iniziale di Axios: cosa è successo l'ultima volta (nessun dato personale).
+chrome.storage.local.get("probe").then(({ probe }) => {
+  if (!probe) return;
+  const el = document.getElementById("probe");
+  const parts = [`riquadro Voti: ${probe.tile ? "trovato" : "no"}`];
+  if (probe.hrefKind) parts.push(`collegamento: ${probe.hrefKind}`);
+  if (probe.status) parts.push(`risposta ${probe.status}`);
+  if (probe.grid !== undefined) parts.push(probe.grid ? `griglia con ${probe.rows} voti` : "griglia assente");
+  if (probe.path) parts.push(`percorso ${probe.path}`);
+  if (probe.attrs) parts.push(`attributi: ${probe.attrs}`);
+  if (probe.error) parts.push(`errore: ${probe.error}`);
+  el.textContent = `Da home: ${parts.join(" · ")}`;
+});

@@ -3,6 +3,17 @@ importScripts("config.js");
 // Riceve i voti letti dalla pagina del registro e li manda a SchoolOS con il codice di collegamento.
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg && msg.type === "sync" && Array.isArray(msg.rows)) void sync(msg.rows);
+  if (msg && msg.type === "probe" && msg.probe) void chrome.storage.local.set({ probe: msg.probe });
+});
+
+// Ogni 30 minuti chiede alle schede Axios aperte di rileggere i voti (sessione già attiva).
+chrome.alarms.create("refresh", { periodInMinutes: 30 });
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name !== "refresh") return;
+  const tabs = await chrome.tabs.query({ url: "https://*.axioscloud.it/*" });
+  for (const tab of tabs) {
+    if (tab.id) chrome.tabs.sendMessage(tab.id, { type: "refresh" }).catch(() => {});
+  }
 });
 
 async function sync(rows) {
