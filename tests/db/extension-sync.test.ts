@@ -41,7 +41,7 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
     expect(rows.rows.some((r) => Buffer.from(r.token_hash).toString("utf8").includes(token))).toBe(false);
   });
 
-  it("inserisce i voti, salta i duplicati e segnala materie sconosciute e voti non validi", async () => {
+  it("inserisce i voti, salta i duplicati, crea le materie mancanti e segnala i voti non validi", async () => {
     const rows = [
       { subject: "MATEMATICA", value: 8, kind: "written", date: "2026-10-27" },
       { subject: "Scienze motorie", value: 9.5, kind: "practical", date: "2026-10-14" },
@@ -50,10 +50,10 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
       { subject: "Matematica", value: 6.3, kind: "written", date: "2026-10-20" },
       { subject: "Matematica", value: 7, kind: "written", date: "2999-01-01" },
     ];
-    expect(await sync(token, rows)).toEqual({ inserted: 3, skipped: 0, invalid: 2, unmatched: ["Fisica"] });
-    expect(await sync(token, rows)).toMatchObject({ inserted: 0, skipped: 3, invalid: 2 });
+    expect(await sync(token, rows)).toEqual({ inserted: 4, skipped: 0, invalid: 2, unmatched: [], created: ["Fisica"] });
+    expect(await sync(token, rows)).toMatchObject({ inserted: 0, skipped: 4, invalid: 2, created: [] });
     const n = await db.admin.query("select count(*)::int as n from public.grades where user_id = $1", [alice]);
-    expect(n.rows[0].n).toBe(3);
+    expect(n.rows[0].n).toBe(4);
   });
 
   it("i voti vanno solo all'utente del codice", async () => {
@@ -67,7 +67,18 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
       [alice],
     );
     const res = await sync(token, [{ subject: "STORIA DELL'ARTE", value: 8, kind: "oral", date: "2026-10-21" }]);
-    expect(res).toMatchObject({ inserted: 1, unmatched: [] });
+    expect(res).toMatchObject({ inserted: 1, unmatched: [], created: [] });
+  });
+
+  it("le materie create hanno colore e posizione validi e non superano il tetto di 25", async () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({ subject: `Extra ${i}`, value: 7, kind: "written", date: "2026-10-22" }));
+    const res = (await sync(token, many)) as { created: string[]; unmatched: string[] };
+    const total = await db.admin.query("select count(*)::int as n, min(color) as lo, max(color) as hi from public.subjects where user_id = $1", [alice]);
+    expect(total.rows[0].n).toBeLessThanOrEqual(25);
+    expect(total.rows[0].lo).toBeGreaterThanOrEqual(1);
+    expect(total.rows[0].hi).toBeLessThanOrEqual(8);
+    expect(res.created.length + res.unmatched.length).toBe(40);
+    expect(res.unmatched.length).toBeGreaterThan(0);
   });
 
   it("rifiuta codici sbagliati, malformati o revocati", async () => {

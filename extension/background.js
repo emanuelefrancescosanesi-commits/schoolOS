@@ -39,7 +39,8 @@ async function sync(rows) {
       return setStatus({ ok: false, text: res.status === 400 || res.status === 401 ? "Codice non valido: rifai il collegamento" : "Errore di rete" }, "!");
     }
     const r = await res.json();
-    const text = r.inserted > 0 ? `${r.inserted} voti nuovi inviati` : "Nessun voto nuovo";
+    let text = r.inserted > 0 ? `${r.inserted} voti nuovi inviati` : "Nessun voto nuovo";
+    if (r.created && r.created.length) text += ` · materie create: ${r.created.join(", ")}`;
     await setStatus({ ok: true, text, unmatched: r.unmatched || [], at: Date.now() }, r.inserted > 0 ? String(r.inserted) : "");
   } catch {
     await setStatus({ ok: false, text: "Errore di rete" }, "!");
