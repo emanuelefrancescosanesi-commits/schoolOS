@@ -3,7 +3,7 @@
  * essere aggirato; il client li usa solo per avvisare prima.
  */
 
-export const MAX_TEXT_CHARS = 15_000;
+export const MAX_TEXT_CHARS = 40_000;
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 export type ImageType = (typeof IMAGE_TYPES)[number];
