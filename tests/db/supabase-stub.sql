@@ -27,8 +27,5 @@ $$;
 grant usage on schema public, auth, extensions to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
 
--- Supabase concede di default tutti i privilegi su public a questi ruoli: la sicurezza
--- deve quindi venire dalla RLS e dalle revoche esplicite nelle migrazioni.
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+-- I progetti Supabase nuovi NON concedono privilegi di default sulle tabelle di public:
+-- lo stub non deve farlo, così i test falliscono se una migrazione dimentica i GRANT.
