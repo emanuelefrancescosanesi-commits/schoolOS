@@ -11,7 +11,7 @@ export function Checkbox({ className, ...props }: React.ComponentProps<typeof Ch
       data-slot="checkbox"
       className={cn(
         "peer relative size-[18px] shrink-0 rounded-[5px] border border-muted/60 bg-surface transition-colors duration-150",
-        "after:absolute after:-inset-3 after:content-['']",
+        "after:absolute after:-inset-3 pointer-coarse:after:-inset-3.5 after:content-['']",
         "data-[state=checked]:border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-fg",
         className,
       )}

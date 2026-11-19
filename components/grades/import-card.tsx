@@ -13,6 +13,7 @@ import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
 import { MAX_IMAGE_BYTES, MAX_TEXT_CHARS } from "@/lib/import/input";
+import { readScreenshot } from "@/lib/import/ocr";
 import type { GradeKind, ImportRow } from "@/lib/import/normalize";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -43,21 +44,41 @@ export function ImportCard({ today, scale, subjects }: Props) {
   const [done, setDone] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const form = useRef<HTMLFormElement>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [ocr, setOcr] = useState<{ busy: boolean; progress: number; note: string | null }>({ busy: false, progress: 0, note: null });
   const subjectIds = new Set(subjects.map((s) => s.id));
 
   const reset = () => {
     setRows(null);
     setError(null);
+    setOcr({ busy: false, progress: 0, note: null });
     form.current?.reset();
+  };
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    if (file.size > MAX_IMAGE_BYTES) return setError("L'immagine è troppo grande (massimo 4 MB).");
+    setOcr({ busy: true, progress: 0, note: null });
+    try {
+      const text = await readScreenshot(file, (progress) => setOcr((o) => ({ ...o, progress })));
+      if (textRef.current) textRef.current.value = text;
+      setOcr({ busy: false, progress: 1, note: text ? m.ocrDone : m.ocrEmpty });
+    } catch {
+      setOcr({ busy: false, progress: 0, note: null });
+      setError(m.ocrFailed);
+    }
+    e.target.value = "";
   };
 
   const analyze = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setDone(null);
-    const data = new FormData(e.currentTarget);
-    const file = data.get("file");
-    if (file instanceof File && file.size > MAX_IMAGE_BYTES) return setError("L'immagine è troppo grande (massimo 4 MB).");
+    // Lo screenshot è già stato letto sul dispositivo: al server arriva solo il testo.
+    const data = new FormData();
+    data.set("text", textRef.current?.value ?? "");
     startTransition(async () => {
       const result = await previewImport(data);
       if (!result.ok) {
@@ -121,6 +142,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
               <Field label={m.textLabel} htmlFor="import-text">
                 <textarea
                   id="import-text"
+                  ref={textRef}
                   name="text"
                   rows={6}
                   maxLength={MAX_TEXT_CHARS}
@@ -129,12 +151,26 @@ export function ImportCard({ today, scale, subjects }: Props) {
                 />
               </Field>
               <Field label={m.fileLabel} htmlFor="import-file" hint={m.fileHint}>
-                <Input id="import-file" name="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="h-auto py-2" />
+                <Input
+                  id="import-file"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="h-auto py-2"
+                  disabled={ocr.busy}
+                  onChange={onFile}
+                />
               </Field>
+              {ocr.busy && (
+                <p role="status" className="flex items-center gap-2 text-sm text-muted">
+                  <LoaderCircleIcon className="size-4 animate-spin" aria-hidden />
+                  {m.ocrReading(Math.round(ocr.progress * 100))}
+                </p>
+              )}
+              {ocr.note && <FormMessage tone="notice">{ocr.note}</FormMessage>}
               <p className="text-xs text-muted">{m.privacy}</p>
               {error && <FormMessage tone="error">{error}</FormMessage>}
               <div className="flex items-center gap-3">
-                <Button type="submit" variant="primary" disabled={pending}>
+                <Button type="submit" variant="primary" disabled={pending || ocr.busy}>
                   {pending ? <LoaderCircleIcon className="animate-spin" aria-hidden /> : <FileUpIcon strokeWidth={1.5} />}
                   {pending ? m.analyzing : m.analyze}
                 </Button>
@@ -174,9 +210,10 @@ export function ImportCard({ today, scale, subjects }: Props) {
                         aria-label={m.include(label)}
                         className="mt-2.5"
                       />
-                      <div className="grid gap-2 sm:grid-cols-[1.3fr_0.6fr_0.9fr_0.8fr]">
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.3fr_0.6fr_0.9fr_0.8fr]">
                         <Select
                           aria-label={`${m.chooseSubject}: ${r.subjectGuess}`}
+                          className="col-span-2 sm:col-span-1"
                           value={r.subjectId ?? ""}
                           onChange={(e) => update(r.key, { subjectId: e.target.value || null, selected: true })}
                           aria-invalid={!r.subjectId}
@@ -214,7 +251,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
                           <option value="practical">Pratico</option>
                         </Select>
                         {(issue || r.status === "duplicate") && (
-                          <div className="flex flex-wrap items-center gap-2 sm:col-span-4">
+                          <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-span-4">
                             {issue ? (
                               <Badge tone="critical">{issue}</Badge>
                             ) : (

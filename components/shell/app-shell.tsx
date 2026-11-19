@@ -41,7 +41,7 @@ export function AppShell({
 
         {/* Barra superiore solo su smartphone e tablet. */}
         <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-bg/90 px-4 backdrop-blur lg:hidden">
-          <Link href="/dashboard" aria-label={m.meta.appName} className="rounded-control">
+          <Link href="/dashboard" aria-label={m.meta.appName} className="inline-flex min-h-11 items-center rounded-control">
             <Logo />
           </Link>
           <div className="flex items-center gap-1">
@@ -49,7 +49,7 @@ export function AppShell({
             <Link
               href="/notifications"
               aria-label={m.nav.notifications}
-              className="inline-flex size-9 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
+              className="inline-flex size-9 pointer-coarse:size-11 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
             >
               <BellIcon strokeWidth={1.5} className="size-[18px]" />
             </Link>
