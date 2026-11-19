@@ -105,6 +105,14 @@ export type AssignmentRow = {
   updated_at: string;
 };
 
+type ExtensionTokenRow = {
+  id: string;
+  user_id: string;
+  label: string;
+  created_at: string;
+  last_used_at: string | null;
+};
+
 type Generated = "id" | "user_id" | "created_at" | "updated_at";
 type Insertable<R, Required extends keyof R> = Pick<R, Required> & Partial<Omit<R, Required>>;
 
@@ -124,10 +132,14 @@ export type Database = {
       subjects: Table<SubjectRow, Insertable<Omit<SubjectRow, Generated>, "school_year_id" | "name" | "color">>;
       grades: Table<GradeRow, Insertable<Omit<GradeRow, Exclude<Generated, "id">>, "subject_id" | "value" | "graded_on">>;
       assignments: Table<AssignmentRow, Insertable<Omit<AssignmentRow, Generated>, "title" | "due_on">>;
+      // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
+      extension_tokens: Table<ExtensionTokenRow, never, never>;
     };
     Views: { [_ in never]: never };
     Functions: {
       complete_onboarding: { Args: { payload: Json }; Returns: string };
+      create_extension_token: { Args: { p_label?: string }; Returns: string };
+      sync_grades: { Args: { p_token: string; p_rows: Json }; Returns: Json };
       consume_ai_quota: { Args: { p_kind: string; p_limit: number }; Returns: boolean };
     };
     Enums: {

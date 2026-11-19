@@ -50,3 +50,12 @@ document.getElementById("copy").addEventListener("click", async () => {
   await navigator.clipboard.writeText(document.getElementById("report").value);
   msg.textContent = "Copiato. Incollalo nella chat con Claude.";
 });
+
+// Esito dell'ultima sincronizzazione automatica.
+chrome.storage.local.get("lastSync").then(({ lastSync }) => {
+  if (!lastSync) return;
+  const when = lastSync.at ? new Date(lastSync.at).toLocaleString("it-IT") : "";
+  msg.textContent = `Ultima sincronizzazione: ${lastSync.text}${when ? " (" + when + ")" : ""}`;
+  if (lastSync.unmatched && lastSync.unmatched.length) msg.textContent += `. Materie non trovate in SchoolOS: ${lastSync.unmatched.join(", ")}`;
+});
+chrome.action.setBadgeText({ text: "" });

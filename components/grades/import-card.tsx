@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, Select } from "@/components/ui/input";
 import { Field, FormMessage } from "@/components/ui/label";
+import { ExtensionLink } from "@/components/grades/extension-link";
 import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
@@ -214,6 +215,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
                   <p className="text-xs">{m.bookmarkletPrivacy}</p>
                 </div>
               </details>
+              <ExtensionLink />
               {error && <FormMessage tone="error">{error}</FormMessage>}
               <div className="flex items-center gap-3">
                 <Button type="submit" variant="primary" disabled={pending || ocr.busy}>

@@ -7,3 +7,18 @@ document.getElementById("save").addEventListener("click", async () => {
   await chrome.storage.sync.set({ appUrl: u.origin });
   document.getElementById("ok").textContent = "Salvato.";
 });
+
+const tokenInput = document.getElementById("token");
+const okToken = document.getElementById("okToken");
+chrome.storage.local.get("token").then(({ token }) => { if (token) tokenInput.value = token; });
+document.getElementById("saveToken").addEventListener("click", async () => {
+  const t = tokenInput.value.trim();
+  if (!/^sos_[0-9a-f]{64}$/.test(t)) { okToken.textContent = "Codice non valido."; return; }
+  await chrome.storage.local.set({ token: t });
+  okToken.textContent = "Collegato.";
+});
+document.getElementById("clearToken").addEventListener("click", async () => {
+  await chrome.storage.local.remove("token");
+  tokenInput.value = "";
+  okToken.textContent = "Scollegato.";
+});
