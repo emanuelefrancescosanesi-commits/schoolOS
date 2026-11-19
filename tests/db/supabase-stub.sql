@@ -16,11 +16,21 @@ create function auth.uid() returns uuid
 language sql stable
 as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 
+-- I ruoli sono globali al server: i file di test girano in parallelo, quindi la creazione
+-- deve tollerare un altro processo che crea lo stesso ruolo nello stesso istante.
 do $$
+declare
+  r record;
 begin
-  if not exists (select from pg_roles where rolname = 'anon') then create role anon nologin; end if;
-  if not exists (select from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
-  if not exists (select from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+  for r in select * from (values ('anon', false), ('authenticated', false), ('service_role', true)) as t(name, bypass) loop
+    begin
+      if not exists (select from pg_roles where rolname = r.name) then
+        execute format('create role %I nologin %s', r.name, case when r.bypass then 'bypassrls' else '' end);
+      end if;
+    exception when duplicate_object or unique_violation then
+      null;
+    end;
+  end loop;
 end;
 $$;
 
