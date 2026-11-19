@@ -76,7 +76,7 @@ Ogni tabella appartiene a un solo utente (`user_id`) e la Row Level Security con
 
 | Tabella | Contiene | Relazioni principali |
 |---|---|---|
-| `profiles` | Nome, scuola, classe, sistema di valutazione, metodo di media preferito, layout della dashboard (JSON) | 1:1 con `auth.users` |
+| `profiles` | Nome, scuola, classe, registro scelto, tipo di periodi, sistema di valutazione (scala, mezzi voti, "+" / "−"), metodo di media preferito, layout della dashboard (JSON) | 1:1 con `auth.users` |
 | `school_years`, `periods` | Anno scolastico e periodi (quadrimestri o trimestri) con date | periodo → anno |
 | `subjects` | Materia, colore, icona, peso predefinito per tipologia | → anno; ← voti, compiti, eventi |
 | `teachers` | Nome, contatto, materie | N:M con `subjects` |
@@ -113,7 +113,7 @@ L'app ha 16 schermate: le 14 richieste, più "My School" e una landing pubblica.
 |---|---|---|
 | `/` | Landing | Presentazione, asset Higgsfield, accesso |
 | `/login` | Login / Registrazione | Email + password o Google; recupero password |
-| `/onboarding` | Onboarding | 7 passi: nome, scuola, classe, anno, materie, valutazione, registro; poi integrazioni facoltative |
+| `/onboarding` | Onboarding | Setup su misura al primo avvio, 7 passi: nome, scuola, classe, anno e periodi, materie, scala di valutazione, registro; poi integrazioni facoltative. Vedi "Configurazione per studente" |
 | `/dashboard` | Dashboard | Widget spostabili e nascondibili: rendimento, prossimi impegni, attività, comunicazioni, settimana |
 | `/my-school` | My School | Feed unificato con fonti e "Recent Changes" |
 | `/grades` | Voti | Elenco filtrabile, inserimento rapido, 5 grafici |
@@ -176,6 +176,29 @@ Se $x$ supera il massimo della scala, l'app dice che l'obiettivo non è raggiung
 
 **Privacy dell'AI.** Il testo delle email viene inviato al provider AI solo per le funzioni attive, e ognuna si può spegnere nelle impostazioni. L'informativa nell'onboarding lo spiega in chiaro.
 
+## Configurazione per studente
+
+Le scelte non sono fisse: ogni utente le sceglie nell'onboarding e le può cambiare in `/settings`. Il primo avvio è un setup guidato su misura, prima di qualsiasi altra schermata.
+
+| Scelta | Opzioni | Effetto |
+|---|---|---|
+| Registro | ClasseViva, Argo, Axios, altro, nessuno | Mostra le istruzioni di import adatte a quel registro (email di notifica, file, testo incollato, manuale). Nessun accesso diretto: vedi "Verifica delle integrazioni" |
+| Email | Google (principale), Outlook / Microsoft 365 (opzionale), nessuna | Quali adapter attivare |
+| Scala di voti | Decimi; mezzi voti sì/no; "+" e "−" sì/no | Valori ammessi nei voti e vincolo `CHECK` sul database |
+| Periodi | Trimestri; trimestre + pentamestre; quadrimestri | Righe di `periods` con le date scelte dall'utente |
+| Metodo di media | Aritmetica o pesata | Calcoli in `lib/domain/` |
+
+Tutto si appoggia sui campi già previsti in `profiles` e `periods`: la configurazione cambia i dati, non il codice. Per questo ogni calcolo legge la scala e i periodi dal profilo e non assume né i decimi né un numero fisso di periodi. Un "+" vale per esempio 0,25 e un "−" vale −0,25; il valore è una proposta da confermare.
+
+## Chatbot di supporto
+
+Oltre all'assistente sui dati, l'app ha un chatbot di supporto con un solo compito: rispondere alle domande dell'utente su come si usa l'app e, se non capisce la domanda, chiedere di riformularla.
+
+- **Modello:** il più economico della famiglia, Haiku 5.5, dietro l'interfaccia di provider già prevista.
+- **Pochi token:** nessuna cronologia lunga (solo gli ultimi scambi), `max_tokens` basso, risposte brevi, un prompt di sistema compatto con la guida dell'app messa in cache.
+- **Nessun accesso ai dati scolastici:** non legge voti, email o compiti, quindi costa poco e non espone nulla.
+- **Limiti:** rate limit per utente, come per le altre funzioni AI.
+
 ## My School: fonti, duplicati e modifiche
 
 Ogni dato in arrivo viene normalizzato in un candidato, confrontato con gli elementi esistenti e poi fuso, creato o proposto come modifica. Una verifica che compare sia in un'email sia in un inserimento manuale resta quindi un solo elemento, con due fonti.
@@ -202,11 +225,14 @@ Per approvare il piano servono le tue risposte alle domande qui sotto; gli accou
 
 ### Da decidere prima della Fase 2
 
-- [ ] Consegna del codice: repository GitHub (quale?) o archivio da scaricare
-- [ ] Registro elettronico della tua scuola (ClasseViva, Argo, Axios, altro)
-- [ ] Email scolastica: Google Workspace o Microsoft 365, e se la scuola permette app di terze parti
-- [ ] Scala di valutazione (decimi, con o senza mezzi voti e "+" / "−") e suddivisione dell'anno (quadrimestri o trimestri)
-- [ ] Provider AI: Claude come predefinito o un altro
+- [x] Consegna del codice: repository GitHub `schoolOS`
+- [x] Registro elettronico: non fisso, scelto dall'utente in onboarding (ClasseViva, Argo, Axios, altro); i dati entrano per email, file, testo incollato o inserimento manuale
+- [x] Email: Google come principale, Outlook / Microsoft 365 opzionale
+- [x] Scala di valutazione: decimi, con opzioni per mezzi voti e "+" / "−"; suddivisione dell'anno scelta dall'utente (trimestri, trimestre + pentamestre, quadrimestri)
+- [x] Provider AI: Claude, con il modello più economico (Haiku 5.5) per il chatbot di supporto
+- [ ] Da verificare con la scuola: se permette app di terze parti sull'email scolastica
+
+Dettagli delle scelte in "Configurazione per studente" e "Chatbot di supporto".
 
 ### Da creare prima della Fase 3
 
