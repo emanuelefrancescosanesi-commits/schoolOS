@@ -7,7 +7,15 @@ import { MobileNav } from "./mobile-nav";
 import { Sidebar } from "./sidebar";
 import { ThemeToggle } from "./theme-toggle";
 
-export function AppShell({ children, isDemo }: { children: React.ReactNode; isDemo: boolean }) {
+export function AppShell({
+  children,
+  isDemo,
+  account,
+}: {
+  children: React.ReactNode;
+  isDemo: boolean;
+  account?: React.ReactNode;
+}) {
   const m = getMessages();
   return (
     <TooltipProvider>
@@ -18,7 +26,7 @@ export function AppShell({ children, isDemo }: { children: React.ReactNode; isDe
         {m.common.skipToContent}
       </a>
 
-      <Sidebar />
+      <Sidebar account={account} />
 
       <div className="flex min-h-dvh flex-col transition-[padding] duration-200 ease-soft lg:sidebar-offset">
         {isDemo && (
@@ -53,7 +61,7 @@ export function AppShell({ children, isDemo }: { children: React.ReactNode; isDe
         </main>
       </div>
 
-      <MobileNav />
+      <MobileNav account={account} />
     </TooltipProvider>
   );
 }

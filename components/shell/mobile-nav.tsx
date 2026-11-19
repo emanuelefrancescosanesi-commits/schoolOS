@@ -10,7 +10,7 @@ import { MOBILE_ITEMS, NAV_GROUPS, NAV_ITEMS, isActive } from "@/lib/navigation"
 import { cn } from "@/lib/utils";
 
 /** Barra inferiore su smartphone e tablet (< lg): quattro sezioni + "Altro". */
-export function MobileNav() {
+export function MobileNav({ account }: { account?: React.ReactNode }) {
   const m = getMessages();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -82,6 +82,7 @@ export function MobileNav() {
                   </ul>
                 </div>
               ))}
+              {account && <div className="mt-6 border-t border-border pt-3">{account}</div>}
             </SheetContent>
           </Sheet>
         </li>

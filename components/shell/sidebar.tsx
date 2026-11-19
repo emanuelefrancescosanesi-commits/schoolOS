@@ -15,7 +15,7 @@ import { ThemeToggle } from "./theme-toggle";
  * Barra laterale desktop (≥ lg). Comprimibile: la larghezza è guidata da
  * `data-sidebar` su <html>, così lo stato salvato si applica prima del paint.
  */
-export function Sidebar() {
+export function Sidebar({ account }: { account?: React.ReactNode }) {
   const m = getMessages();
   const pathname = usePathname();
   const { collapsed, setCollapsed } = useSidebarCollapsed();
@@ -48,6 +48,7 @@ export function Sidebar() {
       </nav>
 
       <div className="flex flex-col gap-0.5 border-t border-border p-3">
+        {account}
         <ThemeToggle withLabel />
         <button
           type="button"

@@ -34,7 +34,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "mySchool", href: "/my-school", icon: SchoolIcon, group: "main", mobile: true },
   { key: "inbox", href: "/inbox", icon: InboxIcon, group: "main", mobile: true },
   { key: "assistant", href: "/assistant", icon: SparklesIcon, group: "main" },
-  { key: "grades", href: "/grades", icon: GraduationCapIcon, group: "study" },
+  { key: "grades", href: "/grades", icon: GraduationCapIcon, group: "study", ready: true },
   { key: "analytics", href: "/analytics", icon: ChartLineIcon, group: "study" },
   { key: "subjects", href: "/subjects", icon: BookOpenIcon, group: "study" },
   { key: "tasks", href: "/tasks", icon: ListChecksIcon, group: "study", mobile: true },
