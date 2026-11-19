@@ -25,3 +25,6 @@ Permessi in più rispetto al clic manuale: lettura delle pagine `*.axioscloud.it
 
 ## Dalla schermata iniziale (v0.3.0)
 Sulla home di Axios l'estensione trova il riquadro «Voti» e ne scarica la pagina con la stessa sessione (nessun cambio di pagina per te). Il popup mostra una riga «Da home: …» con l'esito (riquadro trovato, tipo di collegamento, risposta, voti letti): nessun dato personale. Permessi aggiunti: `alarms` e lettura di `*.axioscloud.it`.
+
+## Altri registri (v0.4.0)
+Se la pagina non è quella di Axios, «Importa questa pagina» prova una lettura generica (`generic.js`): cerca tabelle in cui riconosce dal contenuto una colonna di date, una di voti e una di materie (elenco «un voto per riga»), oppure una griglia con le date in intestazione. Il risultato va sempre all'anteprima di SchoolOS, dove lo studente conferma o corregge. Non è un parser su misura: per ClasseViva e Argo servono report anonimi di pagine vere per affinarlo.

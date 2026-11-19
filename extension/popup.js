@@ -19,6 +19,12 @@ document.getElementById("go").addEventListener("click", async () => {
     const [axios] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => axiosToText(document) });
     let text = axios && axios.result;
     if (!text) {
+      // Altro registro: lettura generica per contenuto (tabelle con date, voti e materie).
+      await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["generic.js"] });
+      const [gen] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => genericToText(document) });
+      text = gen && gen.result;
+    }
+    if (!text) {
       const [res] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: extract, args: [MAX_CHARS] });
       text = res && res.result;
     }
