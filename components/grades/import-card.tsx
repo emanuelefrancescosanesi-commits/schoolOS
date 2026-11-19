@@ -1,7 +1,7 @@
 "use client";
 
 import { FileUpIcon, LoaderCircleIcon, ScanTextIcon } from "lucide-react";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { confirmImport, previewImport } from "@/app/(app)/grades/import/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Field, FormMessage } from "@/components/ui/label";
 import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
+import { buildBookmarklet, readImportHash } from "@/lib/import/bookmarklet";
 import { MAX_IMAGE_BYTES, MAX_TEXT_CHARS } from "@/lib/import/input";
 import { readScreenshot } from "@/lib/import/ocr";
 import type { GradeKind, ImportRow } from "@/lib/import/normalize";
@@ -74,11 +75,15 @@ export function ImportCard({ today, scale, subjects }: Props) {
 
   const analyze = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    analyzeText(textRef.current?.value ?? "");
+  };
+
+  const analyzeText = (text: string) => {
     setError(null);
     setDone(null);
     // Lo screenshot è già stato letto sul dispositivo: al server arriva solo il testo.
     const data = new FormData();
-    data.set("text", textRef.current?.value ?? "");
+    data.set("text", text);
     startTransition(async () => {
       const result = await previewImport(data);
       if (!result.ok) {
@@ -87,6 +92,32 @@ export function ImportCard({ today, scale, subjects }: Props) {
       }
       setRows(result.rows.map((r) => ({ ...r, selected: r.status === "ready" })));
     });
+  };
+
+  // Testo portato dal segnalibro: lo togliamo subito dall'indirizzo e lo analizziamo.
+  useEffect(() => {
+    const text = readImportHash(window.location.hash);
+    if (!text) return;
+    const id = setTimeout(() => {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+      setOpen(true);
+      setOcr({ busy: false, progress: 0, note: m.bookmarkletReceived });
+      analyzeText(text);
+    }, 0);
+    return () => clearTimeout(id);
+    // Solo al primo caricamento: il segnalibro apre sempre la pagina da zero.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [copied, setCopied] = useState(false);
+  const copyBookmarklet = async () => {
+    try {
+      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      setError(m.copyFailed);
+    }
   };
 
   const update = (key: string, patch: Partial<Draft>) =>
@@ -168,6 +199,21 @@ export function ImportCard({ today, scale, subjects }: Props) {
               )}
               {ocr.note && <FormMessage tone="notice">{ocr.note}</FormMessage>}
               <p className="text-xs text-muted">{m.privacy}</p>
+              <details className="rounded-control border border-border p-3 text-sm">
+                <summary className="cursor-pointer font-medium">{m.bookmarkletTitle}</summary>
+                <div className="mt-3 flex flex-col gap-3 text-muted">
+                  <p>{m.bookmarkletIntro}</p>
+                  <ol className="list-decimal space-y-1 pl-5">
+                    {m.bookmarkletSteps.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                  <div>
+                    <Button onClick={copyBookmarklet}>{copied ? m.copied : m.copyBookmarklet}</Button>
+                  </div>
+                  <p className="text-xs">{m.bookmarkletPrivacy}</p>
+                </div>
+              </details>
               {error && <FormMessage tone="error">{error}</FormMessage>}
               <div className="flex items-center gap-3">
                 <Button type="submit" variant="primary" disabled={pending || ocr.busy}>
