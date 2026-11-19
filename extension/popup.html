@@ -7,6 +7,9 @@ p{margin:10px 0 0;color:#444;line-height:1.4} a{color:#2563eb}
 #msg{min-height:1.4em}
 </style></head><body>
 <button id="go">Importa questa pagina in SchoolOS</button>
+<button id="learn" style="background:#475569;margin-top:8px">Crea report anonimo della pagina</button>
+<textarea id="report" readonly rows="8" style="display:none;width:100%;margin-top:8px;box-sizing:border-box;font:11px monospace"></textarea>
+<button id="copy" style="display:none;margin-top:6px">Copia il report</button>
 <p id="msg">Apri prima la pagina dei voti del registro.</p>
 <p><a href="options.html" target="_blank">Impostazioni</a></p>
-<script src="popup.js"></script></body></html>
+<script src="anonymize.js"></script><script src="popup.js"></script></body></html>

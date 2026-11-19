@@ -28,3 +28,23 @@ document.getElementById("go").addEventListener("click", async () => {
     msg.textContent = e instanceof Error ? e.message : "Errore imprevisto.";
   }
 });
+
+// Report anonimo: l'utente lo rivede e lo copia a mano, non viene inviato a nessuno.
+document.getElementById("learn").addEventListener("click", async () => {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) throw new Error("Nessuna scheda attiva.");
+    const [res] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: anonymizePage, args: [60000] });
+    const box = document.getElementById("report");
+    box.value = (res && res.result) || "";
+    box.style.display = box.value ? "block" : "none";
+    document.getElementById("copy").style.display = box.value ? "block" : "none";
+    msg.textContent = box.value ? "Rileggi il report: nomi e numeri sono mascherati. Poi copialo." : "Pagina vuota.";
+  } catch (e) {
+    msg.textContent = e instanceof Error ? e.message : "Errore imprevisto.";
+  }
+});
+document.getElementById("copy").addEventListener("click", async () => {
+  await navigator.clipboard.writeText(document.getElementById("report").value);
+  msg.textContent = "Copiato. Incollalo nella chat con Claude.";
+});
