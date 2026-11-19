@@ -26,9 +26,11 @@ function axiosToRows(doc, today) {
   const headRow = grid.querySelector("thead tr");
   if (!headRow) return null;
   for (const th of headRow.children) {
-    const parts = (th.innerText || th.textContent || "").trim().split(/\s+/);
-    const day = Number(parts[0]);
-    const month = MONTHS[(parts[1] || "").slice(0, 3).toLowerCase()];
+    // textContent (non innerText): «29<br>set» diventa «29set», che funziona anche su pagine
+    // scaricate con fetch e non ancora mostrate, dove innerText non converte il <br> in spazio.
+    const dm = /^\s*(\d{1,2})\s*([A-Za-z]{3})/.exec(th.textContent || "");
+    const day = dm ? Number(dm[1]) : 0;
+    const month = dm ? MONTHS[dm[2].toLowerCase()] : undefined;
     const span = Number(th.getAttribute("colspan") || 1);
     const iso = day && month ? `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${yearOf(month)}` : null;
     for (let i = 0; i < span; i++) dates.push(iso);
