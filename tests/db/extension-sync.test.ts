@@ -61,6 +61,15 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
     expect(n.rows[0].n).toBe(0);
   });
 
+  it("riconosce le materie anche con apostrofo curvo e maiuscole diverse", async () => {
+    await db.admin.query(
+      "insert into public.subjects (user_id, school_year_id, name, color) select user_id, school_year_id, 'Storia dell’arte', 3 from public.subjects where user_id = $1 and name = 'Matematica'",
+      [alice],
+    );
+    const res = await sync(token, [{ subject: "STORIA DELL'ARTE", value: 8, kind: "oral", date: "2026-10-21" }]);
+    expect(res).toMatchObject({ inserted: 1, unmatched: [] });
+  });
+
   it("rifiuta codici sbagliati, malformati o revocati", async () => {
     await expect(sync("sos_" + "0".repeat(64), [])).rejects.toThrow(/Codice non valido/);
     await expect(sync("x", [])).rejects.toThrow(/Codice non valido/);
