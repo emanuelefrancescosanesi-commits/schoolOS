@@ -5,7 +5,7 @@
 // Il testo semplice della pagina perde le date: qui si legge la struttura e si produce un testo
 // "MATERIA / gg/mm/aaaa Tipo voto" che il parser di SchoolOS già capisce.
 // Restituisce null se la pagina non è la griglia voti di Axios.
-function axiosToText(doc, today) {
+function axiosToRows(doc, today) {
   const names = doc.querySelector("table.rdoc_full_alunni");
   const grid = doc.querySelector("table.rdoc_full_valutazioni");
   if (!names || !grid) return null;
@@ -36,22 +36,53 @@ function axiosToText(doc, today) {
 
   const subjects = [...names.querySelectorAll("tbody tr")].map((tr) => (tr.cells[0] ? tr.cells[0].textContent.trim() : ""));
   const bodyRows = [...grid.querySelectorAll("tbody tr")].filter((tr) => !tr.classList.contains("bg-grey-cararra"));
-  const out = [];
+  const rows = [];
   bodyRows.forEach((tr, r) => {
-    const lines = [];
     let col = 0;
     for (const td of tr.cells) {
       const span = Number(td.getAttribute("colspan") || 1);
-      if (td.classList.contains("voto")) {
-        const value = (td.textContent || "").trim();
+      if (td.classList.contains("voto") && subjects[r]) {
+        const raw = (td.textContent || "").trim();
         const type = [...td.classList].map((c) => /^voto_([SGOPA])_/.exec(c)).find(Boolean);
         const date = dates[col];
         // Solo voti numerici: "DIST", "-" (senza media) e simili restano fuori.
-        if (date && /^\d+([.,]\d+)?$/.test(value)) lines.push(`${date} ${type ? KINDS[type[1]] : ""} ${value}`.replace(/\s+/g, " "));
+        if (date && /^\d+([.,]\d+)?$/.test(raw)) {
+          rows.push({
+            subject: subjects[r],
+            date, // gg/mm/aaaa
+            raw,
+            value: Number(raw.replace(",", ".")),
+            kind: type ? KINDS[type[1]] : "",
+          });
+        }
       }
       col += span;
     }
-    if (lines.length && subjects[r]) out.push(subjects[r], ...lines, "");
   });
+  return rows;
+}
+
+// Testo «MATERIA / gg/mm/aaaa Tipo voto» che il parser di SchoolOS già capisce (import a mano).
+function axiosToText(doc, today) {
+  const rows = axiosToRows(doc, today);
+  if (!rows) return null;
+  const out = [];
+  let last = null;
+  for (const r of rows.slice().sort((a, b) => a.subject.localeCompare(b.subject))) {
+    if (r.subject !== last) out.push("", r.subject);
+    last = r.subject;
+    out.push(`${r.date} ${r.kind} ${r.raw}`.replace(/\s+/g, " "));
+  }
   return out.join("\n").trim();
+}
+
+// Righe per la sincronizzazione automatica: data ISO, kind come l'enum di SchoolOS.
+function axiosToSyncRows(doc, today) {
+  const rows = axiosToRows(doc, today);
+  if (!rows) return null;
+  const KIND = { Scritto: "written", Grafico: "practical", Orale: "oral", Pratico: "practical", Altro: "written", "": "written" };
+  return rows.map((r) => {
+    const [d, m, y] = r.date.split("/");
+    return { subject: r.subject, date: `${y}-${m}-${d}`, value: r.value, kind: KIND[r.kind] || "written" };
+  });
 }
