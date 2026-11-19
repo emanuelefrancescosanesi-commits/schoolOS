@@ -1,0 +1,193 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * Design token di SchoolOS.
+ * Unica fonte di verità per i colori: i test in lib/design/contrast.test.ts
+ * leggono questo file e verificano il contrasto WCAG AA delle coppie testo/sfondo.
+ * Rispetto al piano, alcuni valori sono stati scuriti/schiariti per superare AA
+ * (vedi commenti "AA").
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  --bg: #fafafb;
+  --surface: #ffffff;
+  --surface-2: #f2f3f6;
+  --border: #e4e6eb;
+  --fg: #0b0d12;
+  --muted: #5f6675; /* AA: piano #6B7280 → 4,36:1 su surface-2 */
+  --accent: #4f46e5;
+  --accent-fg: #ffffff;
+  --accent-text: #4f46e5;
+  --accent-soft: #eef0fe;
+  --positive: #15803d; /* AA: piano #16A34A → 3,3:1 su bianco */
+  --positive-soft: #e8f6ee;
+  --critical: #c81e1e; /* AA: piano #DC2626 → 4,35:1 su surface-2 */
+  --critical-soft: #fdeceb;
+  --warning: #a35200;
+  --warning-soft: #fdf1e3;
+
+  --subject-1: #4f46e5;
+  --subject-2: #0284c7;
+  --subject-3: #059669;
+  --subject-4: #d97706;
+  --subject-5: #e11d48;
+  --subject-6: #7c3aed;
+  --subject-7: #0d9488;
+  --subject-8: #ea580c;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+
+  --sidebar-width: 15rem;
+  --sidebar-width-collapsed: 4rem;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: #0b0d12;
+  --surface: #141821;
+  --surface-2: #1b2230;
+  --border: #252c3b;
+  --fg: #e7e9ef;
+  --muted: #8b93a7;
+  --accent: #5b5bd6; /* AA: piano #6366F1 → 4,47:1 con testo bianco */
+  --accent-fg: #ffffff;
+  --accent-text: #818cf8; /* AA: #6366F1 come testo → 3,57:1 su surface-2 */
+  --accent-soft: #1e2140;
+  --positive: #22c55e;
+  --positive-soft: #11261b;
+  --critical: #f87171; /* AA: piano #EF4444 → 4,23:1 su surface-2 */
+  --critical-soft: #2a1618;
+  --warning: #fbbf24;
+  --warning-soft: #2a2213;
+
+  --subject-1: #818cf8;
+  --subject-2: #38bdf8;
+  --subject-3: #34d399;
+  --subject-4: #fbbf24;
+  --subject-5: #fb7185;
+  --subject-6: #a78bfa;
+  --subject-7: #2dd4bf;
+  --subject-8: #fb923c;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-critical: var(--critical);
+  --color-critical-soft: var(--critical-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+
+  --color-subject-1: var(--subject-1);
+  --color-subject-2: var(--subject-2);
+  --color-subject-3: var(--subject-3);
+  --color-subject-4: var(--subject-4);
+  --color-subject-5: var(--subject-5);
+  --color-subject-6: var(--subject-6);
+  --color-subject-7: var(--subject-7);
+  --color-subject-8: var(--subject-8);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Scala tipografica del piano: 12 / 14 / 16 / 20 / 28 / 40 */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-5xl: 2.5rem;
+  --text-5xl--line-height: 1;
+
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+
+  --ease-soft: var(--ease-out-soft);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent-text);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+  }
+}
+
+/* Numeri in colonna: medie e voti usano cifre tabulari. */
+@utility tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Sidebar: la larghezza dipende da un attributo su <html> impostato da uno
+ * script inline prima del primo paint, così non c'è flash al caricamento.
+ */
+@utility sidebar-width {
+  width: var(--sidebar-width);
+  :where([data-sidebar="collapsed"]) & {
+    width: var(--sidebar-width-collapsed);
+  }
+}
+
+@utility sidebar-offset {
+  padding-left: var(--sidebar-width);
+  :where([data-sidebar="collapsed"]) & {
+    padding-left: var(--sidebar-width-collapsed);
+  }
+}
+
+@custom-variant sidebar-collapsed (&:where([data-sidebar="collapsed"] *));
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
