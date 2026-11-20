@@ -14,11 +14,6 @@
     "default_popup": "popup.html"
   },
   "options_page": "options.html",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "importa-voti@schoolos.invalid"
-    }
-  },
   "host_permissions": [
     "https://oduqbzifwhrunwunuvkl.supabase.co/*",
     "https://*.axioscloud.it/*"
