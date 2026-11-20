@@ -5,6 +5,47 @@
 // Il testo semplice della pagina perde le date: qui si legge la struttura e si produce un testo
 // "MATERIA / gg/mm/aaaa Tipo voto" che il parser di SchoolOS già capisce.
 // Restituisce null se la pagina non è la griglia voti di Axios.
+// Peso del voto (0–10). Axios lo indica fuori dal testo della cella: lo cerchiamo negli attributi
+// (title, data-*, aria-label…) e nei discendenti della cella come «peso 50%», «Peso: 0,5», «50%».
+// Percentuale → frazione (50% = 0,5); numero semplice ≤ 10 = peso diretto. Altrimenti undefined.
+function axiosWeight(td) {
+  const texts = [];
+  const collect = (el) => {
+    for (const a of el.getAttributeNames()) {
+      if (a === "class" || a === "style" || a === "colspan" || a === "id") continue;
+      texts.push(el.getAttribute(a) || "");
+    }
+  };
+  collect(td);
+  for (const el of td.querySelectorAll("*")) {
+    collect(el);
+    if (!el.children.length) texts.push(el.textContent || "");
+  }
+  for (const t of texts) {
+    const m = /peso\s*[:=\-]?\s*(\d+(?:[.,]\d+)?)\s*(%?)/i.exec(t);
+    if (!m) continue;
+    const n = Number(m[1].replace(",", "."));
+    const w = m[2] ? n / 100 : n;
+    if (w > 0 && w <= 10) return Math.round(w * 100) / 100;
+  }
+  return undefined;
+}
+
+// Solo la struttura delle celle voto (nomi di attributi, tag e classi dei figli; nessun contenuto):
+// serve a capire dove Axios scrive il peso senza vedere dati dello studente.
+function axiosCellShape(doc) {
+  const attrs = new Set();
+  const kids = new Set();
+  for (const td of doc.querySelectorAll("table.rdoc_full_valutazioni td.voto")) {
+    for (const a of td.getAttributeNames()) if (a !== "class" && a !== "style") attrs.add(a);
+    for (const el of td.querySelectorAll("*")) {
+      kids.add(el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).join(".") : ""));
+      for (const a of el.getAttributeNames()) if (a !== "class" && a !== "style") attrs.add(el.tagName.toLowerCase() + "@" + a);
+    }
+  }
+  return `attributi: ${[...attrs].slice(0, 12).join(",") || "nessuno"} · figli: ${[...kids].slice(0, 12).join(",") || "nessuno"}`;
+}
+
 function axiosToRows(doc, today) {
   const names = doc.querySelector("table.rdoc_full_alunni");
   const grid = doc.querySelector("table.rdoc_full_valutazioni");
@@ -55,6 +96,7 @@ function axiosToRows(doc, today) {
             raw,
             value: Number(raw.replace(",", ".")),
             kind: type ? KINDS[type[1]] : "",
+            weight: axiosWeight(td),
           });
         }
       }
@@ -85,6 +127,8 @@ function axiosToSyncRows(doc, today) {
   const KIND = { Scritto: "written", Grafico: "practical", Orale: "oral", Pratico: "practical", Altro: "written", "": "written" };
   return rows.map((r) => {
     const [d, m, y] = r.date.split("/");
-    return { subject: r.subject, date: `${y}-${m}-${d}`, value: r.value, kind: KIND[r.kind] || "written" };
+    const out = { subject: r.subject, date: `${y}-${m}-${d}`, value: r.value, kind: KIND[r.kind] || "written" };
+    if (r.weight !== undefined) out.weight = r.weight;
+    return out;
   });
 }

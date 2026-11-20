@@ -50,10 +50,31 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
       { subject: "Matematica", value: 6.3, kind: "written", date: "2026-10-20" },
       { subject: "Matematica", value: 7, kind: "written", date: "2999-01-01" },
     ];
-    expect(await sync(token, rows)).toEqual({ inserted: 4, skipped: 0, invalid: 2, unmatched: [], created: ["Fisica"] });
+    expect(await sync(token, rows)).toEqual({ inserted: 4, skipped: 0, invalid: 2, unmatched: [], created: ["Fisica"], updated: 0 });
     expect(await sync(token, rows)).toMatchObject({ inserted: 0, skipped: 4, invalid: 2, created: [] });
     const n = await db.admin.query("select count(*)::int as n from public.grades where user_id = $1", [alice]);
     expect(n.rows[0].n).toBe(4);
+  });
+
+  it("legge il peso dal registro e corregge quello dei voti già importati senza duplicarli", async () => {
+    const w = async (subject: string, date: string) =>
+      Number((await db.admin.query("select g.weight from public.grades g join public.subjects s on s.id = g.subject_id where g.user_id = $1 and s.name = $2 and g.graded_on = $3", [alice, subject, date])).rows[0].weight);
+    const base = { subject: "Biologia", value: 8, kind: "oral", date: "2026-10-21" };
+    // Importato senza peso (come prima): peso 1.
+    expect(await sync(token, [base])).toMatchObject({ inserted: 1, updated: 0 });
+    expect(await w("Biologia", "2026-10-21")).toBe(1);
+    // Il registro indica 0,5: il voto esistente viene aggiornato, non duplicato.
+    expect(await sync(token, [{ ...base, weight: 0.5 }])).toMatchObject({ inserted: 0, skipped: 1, updated: 1 });
+    expect(await w("Biologia", "2026-10-21")).toBe(0.5);
+    // Stesso peso: nessun aggiornamento. Peso assurdo o assente: ignorato.
+    expect(await sync(token, [{ ...base, weight: 0.5 }])).toMatchObject({ updated: 0 });
+    expect(await sync(token, [{ ...base, weight: 99 }, { ...base, weight: "x" }, base])).toMatchObject({ updated: 0 });
+    expect(await w("Biologia", "2026-10-21")).toBe(0.5);
+    // Voto nuovo con peso.
+    expect(await sync(token, [{ ...base, date: "2026-10-22", weight: 2 }])).toMatchObject({ inserted: 1 });
+    expect(await w("Biologia", "2026-10-22")).toBe(2);
+    const n = await db.admin.query("select count(*)::int as n from public.grades g join public.subjects s on s.id = g.subject_id where g.user_id = $1 and s.name = 'Biologia'", [alice]);
+    expect(n.rows[0].n).toBe(2);
   });
 
   it("i voti vanno solo all'utente del codice", async () => {
