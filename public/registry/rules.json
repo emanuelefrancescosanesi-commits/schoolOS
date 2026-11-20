@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "registries": {
+    "axios": {
+      "registry": "axios",
+      "label": "Axios",
+      "enabled": true,
+      "hosts": ["axioscloud.it"],
+      "loginUrl": "https://segreteriadigitale.axioscloud.it/Pages/SD/SD_Login.aspx",
+      "login": { "passwordField": "input[type=password]" },
+      "home": { "tile": "a.family-tile", "tileLabel": "h4", "tileText": "voti" },
+      "datasets": {
+        "grades": {
+          "subjectsTable": "table.rdoc_full_alunni",
+          "subjectRow": "tbody tr",
+          "gradesTable": "table.rdoc_full_valutazioni",
+          "headRow": "thead tr",
+          "gradeRow": "tbody tr",
+          "skipRowClass": "bg-grey-cararra",
+          "gradeCell": "td.voto",
+          "dateHeader": "^\\s*(\\d{1,2})\\s*([A-Za-z]{3})",
+          "periodSelector": ".select9-chosen",
+          "valuePattern": "^\\d+([.,]\\d+)?$",
+          "kindClass": { "pattern": "^voto_([SGOPA])_", "map": { "S": "written", "G": "practical", "O": "oral", "P": "practical", "A": "written" } },
+          "defaultKind": "written"
+        }
+      }
+    }
+  }
+}

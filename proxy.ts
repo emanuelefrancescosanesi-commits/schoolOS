@@ -7,5 +7,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Esclude asset statici e immagini: il controllo di sessione serve solo alle pagine.
-  matcher: ["/((?!_next/static|_next/image|ocr/|icons/|manifest.webmanifest|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|ocr/|icons/|registry/|manifest.webmanifest|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico)$).*)"],
 };
