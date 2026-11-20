@@ -75,7 +75,11 @@ chrome.action.setBadgeText({ text: "" });
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["axios.js"] });
     const [r] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => axiosToSyncRows(document) });
-    page = r && r.result ? `griglia Axios trovata (${r.result.length} voti)` : "nessuna griglia Axios in questa scheda";
+    page = r && r.result ? `griglia Axios trovata (${r.result.length} voti, ${r.result.filter((x) => x.weight !== undefined).length} con peso letto)` : "nessuna griglia Axios in questa scheda";
+    if (r && r.result) {
+      const [sh] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => axiosCellShape(document) });
+      if (sh && sh.result) page += ` · celle ${sh.result}`;
+    }
   } catch {
     /* scheda senza permesso: resta «non leggibile» */
   }
