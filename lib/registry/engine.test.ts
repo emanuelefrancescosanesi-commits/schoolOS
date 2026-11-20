@@ -75,3 +75,32 @@ describe("motore di lettura registri (Axios)", () => {
     expect((await engine.step(other, axios)).state).toBe("blocked");
   });
 });
+
+describe("segnalibro con motore (iPhone/PC)", () => {
+  it("sulla pagina voti Axios manda il testo ordinato con data, tipo e voto", async () => {
+    const { buildRegistryBookmarklet } = await import("@/lib/import/bookmarklet");
+    const engineSrc = readFileSync("public/registry/engine.js", "utf8");
+    const url = buildRegistryBookmarklet("https://app.example", engineSrc, [axios]);
+    expect(url.startsWith("javascript:")).toBe(true);
+    document.body.innerHTML = GRID;
+    Object.defineProperty(document.body, "innerText", { value: "testo visibile", configurable: true });
+    const opened: string[] = [];
+    (window as unknown as { open: (u: string) => unknown }).open = (u) => (opened.push(u), {});
+    // jsdom: l'host della pagina non è Axios, quindi si prova il ripiego sul testo visibile
+    new Function(decodeURIComponent(url.slice("javascript:".length)))();
+    expect(opened).toHaveLength(1);
+    expect(opened[0]).toContain("https://app.example/grades#import=");
+
+    // Con host Axios: legge la griglia.
+    const g = globalThis as unknown as { location: unknown };
+    const real = Object.getOwnPropertyDescriptor(globalThis, "location");
+    Object.defineProperty(globalThis, "location", { value: { hostname: "reg.axioscloud.it", href: "" }, configurable: true });
+    opened.length = 0;
+    new Function(decodeURIComponent(url.slice("javascript:".length)))();
+    if (real) Object.defineProperty(globalThis, "location", real);
+    void g;
+    const text = decodeURIComponent(opened[0].split("#import=")[1]);
+    expect(text).toContain("Biologia\n14/10/2026 Orale 8");
+    expect(text).toContain("Matematica\n29/09/2026 Scritto 8\n14/10/2026 Orale 5,5");
+  });
+});
