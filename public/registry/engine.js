@@ -201,7 +201,7 @@
       done = true;
       clearTimeout(timer);
       if (obs) obs.disconnect();
-      post(Object.assign({ source: "schoolos-registry", v: 1, registry: rule.registry, path: win.location.pathname }, result));
+      post(Object.assign({ source: "schoolos-registry", v: 1, registry: rule.registry, path: win.location.pathname, origin: win.location.origin }, result));
     }
     function attempt() {
       if (done) return;

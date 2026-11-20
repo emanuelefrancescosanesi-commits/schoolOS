@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "predev": "node scripts/copy-ocr-assets.mjs",
-    "prebuild": "node scripts/copy-ocr-assets.mjs"
+    "prebuild": "node scripts/copy-ocr-assets.mjs",
+    "cap:sync": "cap sync"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, Select } from "@/components/ui/input";
 import { Field, FormMessage } from "@/components/ui/label";
+import { RegistryConnect } from "@/components/grades/registry-connect";
 import { ExtensionLink } from "@/components/grades/extension-link";
 import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
@@ -170,6 +171,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
 
           {!rows ? (
             <form ref={form} onSubmit={analyze} className="flex flex-col gap-4">
+              <RegistryConnect />
               <p className="text-sm text-muted">{m.intro}</p>
               <Field label={m.textLabel} htmlFor="import-text">
                 <textarea
