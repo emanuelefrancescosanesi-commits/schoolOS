@@ -9,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, Select } from "@/components/ui/input";
 import { Field, FormMessage } from "@/components/ui/label";
+import { RegistryConnect } from "@/components/grades/registry-connect";
 import { ExtensionLink } from "@/components/grades/extension-link";
 import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
-import { buildBookmarklet, readImportHash } from "@/lib/import/bookmarklet";
+import { buildBookmarklet, buildRegistryBookmarklet, readImportHash } from "@/lib/import/bookmarklet";
 import { MAX_IMAGE_BYTES, MAX_TEXT_CHARS } from "@/lib/import/input";
 import { readScreenshot } from "@/lib/import/ocr";
 import type { GradeKind, ImportRow } from "@/lib/import/normalize";
@@ -111,9 +112,24 @@ export function ImportCard({ today, scale, subjects }: Props) {
   }, []);
 
   const [copied, setCopied] = useState(false);
+  // Motore e regole si scaricano subito: copiare deve restare un gesto immediato (iPhone lo richiede).
+  const [bookmarklet, setBookmarklet] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    Promise.all([fetch("/registry/engine.js").then((r) => r.text()), fetch("/registry/rules.json").then((r) => r.json())]).then(
+      ([engine, rules]) => {
+        const list = Object.values(rules.registries as Record<string, { enabled: boolean }>).filter((r) => r.enabled);
+        if (alive) setBookmarklet(buildRegistryBookmarklet(window.location.origin, engine, list));
+      },
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, []);
   const copyBookmarklet = async () => {
     try {
-      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin));
+      await navigator.clipboard.writeText(bookmarklet ?? buildBookmarklet(window.location.origin));
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch {
@@ -170,6 +186,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
 
           {!rows ? (
             <form ref={form} onSubmit={analyze} className="flex flex-col gap-4">
+              <RegistryConnect />
               <p className="text-sm text-muted">{m.intro}</p>
               <Field label={m.textLabel} htmlFor="import-text">
                 <textarea

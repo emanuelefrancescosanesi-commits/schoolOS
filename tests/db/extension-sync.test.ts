@@ -102,6 +102,25 @@ describe.skipIf(!url)("sincronizzazione dall'estensione", () => {
     expect(res.unmatched.length).toBeGreaterThan(0);
   });
 
+  it("l'app sincronizza con la sessione, senza codice: stessa logica, solo il proprio utente", async () => {
+    const dave = await db.createUser();
+    const erin = await db.createUser();
+    await db.asUser(dave, (q) => q("select public.complete_onboarding($1)", [payload]));
+    await db.asUser(erin, (q) => q("select public.complete_onboarding($1)", [payload]));
+    const mine = (u: string, rows: unknown) =>
+      db.asUser(u, async (q) => (await q<{ r: Record<string, unknown> }>("select public.sync_my_grades($1) as r", [JSON.stringify(rows)])).rows[0].r);
+    const rows = [{ subject: "Matematica", value: 7, kind: "oral", date: "2026-10-27", weight: 0.5 }];
+    expect(await mine(dave, rows)).toMatchObject({ inserted: 1, skipped: 0, unmatched: [] });
+    expect(await mine(dave, rows)).toMatchObject({ inserted: 0, skipped: 1 });
+    const n = async (u: string) => (await db.admin.query("select count(*)::int as n from public.grades where user_id = $1", [u])).rows[0].n;
+    expect(await n(dave)).toBe(1);
+    expect(await n(erin)).toBe(0);
+    await expect(mine(dave, { a: 1 })).rejects.toThrow(/Dati non validi/);
+    await expect(db.asAnon((q) => q("select public.sync_my_grades('[]')"))).rejects.toThrow(/permission denied/);
+    // La funzione interna non è chiamabile dal client.
+    await expect(db.asUser(dave, (q) => q("select public.sync_grades_for($1, '[]')", [erin]))).rejects.toThrow(/permission denied/);
+  });
+
   it("rifiuta codici sbagliati, malformati o revocati", async () => {
     await expect(sync("sos_" + "0".repeat(64), [])).rejects.toThrow(/Codice non valido/);
     await expect(sync("x", [])).rejects.toThrow(/Codice non valido/);

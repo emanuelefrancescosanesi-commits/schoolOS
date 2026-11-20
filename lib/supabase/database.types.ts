@@ -140,6 +140,7 @@ export type Database = {
       complete_onboarding: { Args: { payload: Json }; Returns: string };
       create_extension_token: { Args: { p_label?: string }; Returns: string };
       sync_grades: { Args: { p_token: string; p_rows: Json }; Returns: Json };
+      sync_my_grades: { Args: { p_rows: Json }; Returns: Json };
       consume_ai_quota: { Args: { p_kind: string; p_limit: number }; Returns: boolean };
     };
     Enums: {
