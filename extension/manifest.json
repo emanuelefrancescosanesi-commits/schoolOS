@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SchoolOS · Importa voti",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Legge la pagina voti del registro e li porta in SchoolOS. Nessuna password, nessun server intermedio.",
   "permissions": [
     "activeTab",
@@ -14,11 +14,6 @@
     "default_popup": "popup.html"
   },
   "options_page": "options.html",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "importa-voti@schoolos.invalid"
-    }
-  },
   "host_permissions": [
     "https://oduqbzifwhrunwunuvkl.supabase.co/*",
     "https://*.axioscloud.it/*"
