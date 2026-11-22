@@ -116,6 +116,14 @@ export const it = {
       events: (n: number) => (n === 0 ? "nessun impegno" : n === 1 ? "1 impegno" : `${n} impegni`),
     },
   },
+  calendarPage: {
+    intro: "Verifiche, interrogazioni e compiti sul mese. Tocca un giorno per vedere cosa c'è.",
+    prev: "Mese precedente",
+    next: "Mese successivo",
+    nothing: "Niente in scadenza questo giorno.",
+    count: (n: number) => (n === 1 ? "1 impegno" : `${n} impegni`),
+    kinds: { homework: "Compito", test: "Verifica", oral: "Interrogazione", project: "Progetto" },
+  },
   tasksPage: {
     intro: "Compiti, verifiche e interrogazioni in ordine di urgenza. Spunta quando hai finito.",
     addTitle: "Aggiungi un impegno",
