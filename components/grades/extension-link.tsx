@@ -80,6 +80,8 @@ export function ExtensionLink() {
                 <li key={c.id} className="flex items-center justify-between gap-3">
                   <span>
                     {c.label} · {c.lastUsedAt ? m.extLastUsed(new Date(c.lastUsedAt).toLocaleDateString("it-IT")) : m.extNever}
+                    {c.status.state === "expired" && <span className="text-critical"> · {m.extExpired}</span>}
+                    {c.status.state === "expiring" && <span className="text-warning"> · {m.extExpiring(c.status.daysLeft)}</span>}
                   </span>
                   <Button onClick={() => revoke(c.id)} disabled={pending}>
                     {m.extRevoke}
@@ -89,6 +91,7 @@ export function ExtensionLink() {
             </ul>
           </div>
         )}
+        <p className="text-xs">{m.extExpiryNote}</p>
         {error && <FormMessage tone="error">{error}</FormMessage>}
       </div>
     </details>

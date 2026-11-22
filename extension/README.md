@@ -28,3 +28,6 @@ Sulla home di Axios l'estensione trova il riquadro «Voti» e ne scarica la pagi
 
 ## Altri registri (v0.4.0)
 Se la pagina non è quella di Axios, «Importa questa pagina» prova una lettura generica (`generic.js`): cerca tabelle in cui riconosce dal contenuto una colonna di date, una di voti e una di materie (elenco «un voto per riga»), oppure una griglia con le date in intestazione. Il risultato va sempre all'anteprima di SchoolOS, dove lo studente conferma o corregge. Non è un parser su misura: per ClasseViva e Argo servono report anonimi di pagine vere per affinarlo.
+
+## Codice revocato o scaduto (v0.4.2)
+Un codice smette di funzionare se lo revochi in SchoolOS o resta 90 giorni senza uso. L'icona mostra «!» e il popup spiega cosa fare («Codice revocato o scaduto») con due link: crea un nuovo codice in SchoolOS (Voti → Importa dal registro) e incollalo nelle Opzioni. Gli errori di rete o del server non chiedono nulla: si riprova alla prossima apertura del registro. In SchoolOS i codici in scadenza o scaduti sono segnalati nella lista «Codici attivi».

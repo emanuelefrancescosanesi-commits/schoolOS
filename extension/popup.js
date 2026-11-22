@@ -61,7 +61,23 @@ document.getElementById("copy").addEventListener("click", async () => {
 chrome.storage.local.get("lastSync").then(({ lastSync }) => {
   if (!lastSync) return;
   const when = lastSync.at ? new Date(lastSync.at).toLocaleString("it-IT") : "";
-  msg.textContent = `Ultima sincronizzazione: ${lastSync.text}${when ? " (" + when + ")" : ""}`;
+  msg.textContent = `${lastSync.ok === false ? "Sincronizzazione non riuscita" : "Ultima sincronizzazione"}: ${lastSync.text}${when ? " (" + when + ")" : ""}`;
+  if (lastSync.ok === false && lastSync.action === "relink") {
+    // Un clic porta alla pagina dove si crea il nuovo codice, l'altro alle Opzioni dove si incolla.
+    chrome.storage.sync.get("appUrl").then(({ appUrl = DEFAULT_APP }) => {
+      const p = document.createElement("p");
+      const a = document.createElement("a");
+      a.href = `${appUrl.replace(/\/$/, "")}/grades`;
+      a.target = "_blank";
+      a.textContent = "1. Crea un nuovo codice in SchoolOS";
+      const b = document.createElement("a");
+      b.href = "options.html";
+      b.target = "_blank";
+      b.textContent = "2. Incollalo nelle Opzioni";
+      p.append(a, document.createElement("br"), b);
+      msg.after(p);
+    });
+  }
   if (lastSync.unmatched && lastSync.unmatched.length) msg.textContent += `. Materie non trovate in SchoolOS: ${lastSync.unmatched.join(", ")}`;
 });
 chrome.action.setBadgeText({ text: "" });

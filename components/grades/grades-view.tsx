@@ -1,10 +1,11 @@
 "use client";
 
-import { GraduationCapIcon, LoaderCircleIcon, PlusIcon, Trash2Icon, Undo2Icon } from "lucide-react";
+import { DownloadIcon, GraduationCapIcon, LoaderCircleIcon, PencilIcon, PlusIcon, Trash2Icon, Undo2Icon } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { addGrade, deleteGrade, restoreGrade } from "@/app/(app)/grades/actions";
 import { EmptyState, SubjectDot } from "@/components/dashboard/widget-card";
+import { GradeEditSheet } from "@/components/grades/grade-edit-sheet";
 import { ImportCard } from "@/components/grades/import-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import type { Period } from "@/lib/domain/periods";
 import { formatDayMonth } from "@/lib/format";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { type GradeSort, gradesToCsv, sortGrades } from "@/lib/grades/csv";
 import { gradeInputSchema } from "@/lib/validation/grade";
 
 const STANDING_TEXT = { positive: "text-positive", borderline: "text-warning", critical: "text-critical" } as const;
@@ -59,19 +61,36 @@ export function GradesView(props: Props) {
   const undoTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(undoTimer.current), []);
 
+  const [subjectFilter, setSubjectFilter] = useState<string>("all");
+  const [sort, setSort] = useState<GradeSort>("date");
+  const [editing, setEditing] = useState<Grade | null>(null);
+
   const period = periods.find((p) => p.id === periodId) ?? null;
+  // Periodo: decide anche le medie. Materia e ordine: solo cosa si vede nelle liste.
   const visible = useMemo(
     () => grades.filter((g) => !period || isWithin(g.date, period.start, period.end)),
     [grades, period],
   );
 
+  const exportCsv = () => {
+    const blob = new Blob([gradesToCsv(visible, subjects, scale)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = m.filters.exportName;
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const overall = overallAverage(visible, averageMethod);
   const perSubject = subjects
     .map((subject) => {
-      const list = visible.filter((g) => g.subjectId === subject.id).sort((a, b) => b.date.localeCompare(a.date));
+      const list = sortGrades(visible.filter((g) => g.subjectId === subject.id), sort);
       return { subject, list, avg: average(list, averageMethod) };
     })
-    .filter((row) => row.list.length > 0);
+    .filter((row) => row.list.length > 0 && (subjectFilter === "all" || row.subject.id === subjectFilter));
   const below = perSubject.filter((r) => r.avg !== null && r.avg < scale.passThreshold).length;
 
   const showUndo = (grade: Grade, restore: () => void) => {
@@ -144,8 +163,35 @@ export function GradesView(props: Props) {
 
         {!demo && subjects.length > 0 && <ImportCard today={props.today} scale={scale} subjects={subjects} />}
 
+        {grades.length > 0 && (
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label={m.filters.subject} htmlFor="f-subject" className="min-w-40 flex-1 sm:max-w-60 sm:flex-none">
+              <Select id="f-subject" value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
+                <option value="all">{m.filters.allSubjects}</option>
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label={m.filters.sort} htmlFor="f-sort" className="min-w-40 flex-1 sm:max-w-48 sm:flex-none">
+              <Select id="f-sort" value={sort} onChange={(e) => setSort(e.target.value as GradeSort)}>
+                <option value="date">{m.filters.sortDate}</option>
+                <option value="value">{m.filters.sortValue}</option>
+              </Select>
+            </Field>
+            <Button onClick={exportCsv} disabled={visible.length === 0} className="sm:ml-auto">
+              <DownloadIcon strokeWidth={1.5} />
+              {m.filters.export}
+            </Button>
+          </div>
+        )}
+
         {perSubject.length === 0 ? (
-          <EmptyState icon={GraduationCapIcon}>{subjects.length === 0 ? m.noSubjects : m.empty}</EmptyState>
+          <EmptyState icon={GraduationCapIcon}>
+            {subjects.length === 0 ? m.noSubjects : visible.length > 0 ? m.filters.noMatch : m.empty}
+          </EmptyState>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {perSubject.map(({ subject, list, avg }) => {
@@ -196,6 +242,15 @@ export function GradesView(props: Props) {
                               <Button
                                 variant="ghost"
                                 size="icon-sm"
+                                onClick={() => setEditing(g)}
+                                aria-label={m.edit.open(`${formatGrade(g.value, scale)} ${subject.name}`)}
+                                className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+                              >
+                                <PencilIcon strokeWidth={1.5} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
                                 onClick={() => onDelete(g)}
                                 aria-label={m.delete(`${formatGrade(g.value, scale)} ${subject.name}`)}
                                 className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
@@ -214,6 +269,16 @@ export function GradesView(props: Props) {
           </div>
         )}
       </div>
+
+      <GradeEditSheet
+        grade={editing}
+        demo={demo}
+        today={props.today}
+        scale={scale}
+        subjects={subjects}
+        onClose={() => setEditing(null)}
+        onSaved={(next) => setGrades((gs) => gs.map((g) => (g.id === next.id ? next : g)))}
+      />
 
       <AnimatePresence>
         {undo && (
