@@ -40,7 +40,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "tasks", href: "/tasks", icon: ListChecksIcon, group: "study", mobile: true, ready: true },
   { key: "calendar", href: "/calendar", icon: CalendarDaysIcon, group: "study", ready: true },
   { key: "timetable", href: "/timetable", icon: CalendarClockIcon, group: "study", ready: true },
-  { key: "notifications", href: "/notifications", icon: BellIcon, group: "system" },
+  { key: "notifications", href: "/notifications", icon: BellIcon, group: "system", ready: true },
   { key: "integrations", href: "/integrations", icon: PlugIcon, group: "system", ready: true },
   { key: "settings", href: "/settings", icon: SettingsIcon, group: "system", ready: true },
 ];

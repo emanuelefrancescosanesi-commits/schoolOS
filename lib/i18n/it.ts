@@ -142,6 +142,17 @@ export const it = {
     priorityHigh: "Urgente",
     remove: (title: string) => `Elimina: ${title}`,
   },
+  notificationsPage: {
+    intro: "Quello che richiede attenzione adesso, calcolato sui tuoi compiti e sulle tue verifiche.",
+    empty: "Niente di urgente. Bel lavoro.",
+    note: "I promemoria si aggiornano quando apri l'app. Le notifiche push arriveranno più avanti.",
+    types: {
+      overdue: (days: number) => (days === -1 ? "Scaduto ieri" : `Scaduto da ${-days} giorni`),
+      today: () => "Per oggi",
+      "soon-test": (days: number, kind: string) => (days === 0 ? kind : days === 1 ? `${kind} domani` : `${kind} tra ${days} giorni`),
+      tomorrow: () => "Per domani",
+    },
+  },
   mySchoolPage: {
     intro: "La tua scuola in una pagina: anno, periodi e materie con i docenti.",
     noSchool: "Scuola non indicata",
