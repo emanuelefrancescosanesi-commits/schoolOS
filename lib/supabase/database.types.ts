@@ -119,6 +119,15 @@ export type TodoProjectRow = {
   updated_at: string;
 };
 
+export type NotificationReadRow = { user_id: string; reminder_id: string; read_at: string };
+export type GoalRow = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  target: number;
+  created_at: string;
+  updated_at: string;
+};
 export type TodoLabelRow = { id: string; user_id: string; name: string; created_at: string };
 
 export type TodoRow = {
@@ -206,6 +215,8 @@ export type Database = {
       subjects: Table<SubjectRow, Insertable<Omit<SubjectRow, Generated>, "school_year_id" | "name" | "color">>;
       grades: Table<GradeRow, Insertable<Omit<GradeRow, Exclude<Generated, "id">>, "subject_id" | "value" | "graded_on">>;
       assignments: Table<AssignmentRow, Insertable<Omit<AssignmentRow, Generated>, "title" | "due_on">>;
+      notification_reads: Table<NotificationReadRow, Insertable<Omit<NotificationReadRow, "user_id" | "read_at">, "reminder_id">>;
+      goals: Table<GoalRow, Insertable<Omit<GoalRow, Generated>, "target">>;
       todo_projects: Table<TodoProjectRow, Insertable<Omit<TodoProjectRow, Generated>, "name">>;
       todo_labels: Table<TodoLabelRow, Insertable<Omit<TodoLabelRow, "id" | "user_id" | "created_at">, "name">>;
       todos: Table<TodoRow, Insertable<Omit<TodoRow, Generated>, "title">>;
