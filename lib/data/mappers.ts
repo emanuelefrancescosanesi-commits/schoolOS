@@ -20,6 +20,8 @@ export function scaleFromProfile(p: ProfileRow): GradingScale {
 export function profileFromRow(p: ProfileRow): StudentProfile {
   return {
     firstName: p.first_name,
+    schoolName: p.school_name?.trim() || undefined,
+    className: p.class_name?.trim() || undefined,
     timeZone: p.time_zone,
     scale: scaleFromProfile(p),
     averageMethod: p.average_method,
