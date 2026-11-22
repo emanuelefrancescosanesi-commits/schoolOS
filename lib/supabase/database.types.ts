@@ -105,6 +105,17 @@ export type AssignmentRow = {
   updated_at: string;
 };
 
+export type TimetableSlotRow = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  weekday: number;
+  starts_at: string;
+  ends_at: string;
+  room: string | null;
+  created_at: string;
+};
+
 type ExtensionTokenRow = {
   id: string;
   user_id: string;
@@ -132,6 +143,10 @@ export type Database = {
       subjects: Table<SubjectRow, Insertable<Omit<SubjectRow, Generated>, "school_year_id" | "name" | "color">>;
       grades: Table<GradeRow, Insertable<Omit<GradeRow, Exclude<Generated, "id">>, "subject_id" | "value" | "graded_on">>;
       assignments: Table<AssignmentRow, Insertable<Omit<AssignmentRow, Generated>, "title" | "due_on">>;
+      timetable_slots: Table<
+        TimetableSlotRow,
+        Insertable<Omit<TimetableSlotRow, Exclude<Generated, "id">>, "weekday" | "starts_at" | "ends_at">
+      >;
       // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
       extension_tokens: Table<ExtensionTokenRow, never, never>;
     };
