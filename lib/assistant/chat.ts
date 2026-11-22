@@ -11,7 +11,7 @@ import { type ChatMessage, MAX_REPLY_TOKENS } from "./policy";
  */
 
 /** Modello piccolo ed economico: risposte brevi su un testo di riferimento. */
-export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-haiku-5-5";
+export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-haiku-4-5";
 
 export class AssistantUnavailableError extends Error {}
 export class AssistantReplyError extends Error {}

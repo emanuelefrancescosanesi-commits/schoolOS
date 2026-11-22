@@ -28,7 +28,7 @@ describe("askAssistant", () => {
     const out = await askAssistant([{ role: "user", content: "Come aggiungo un voto?" }], client);
     expect(out).toBe("Vai in Voti.");
     const req = create.mock.calls[0][0];
-    expect(req.model).toBe("claude-haiku-5-5");
+    expect(req.model).toBe("claude-haiku-4-5");
     expect(req.tools).toBeUndefined();
     expect(req.max_tokens).toBeLessThanOrEqual(300);
     expect(req.system[0].text).toContain("Come aggiungo un voto a mano?");
