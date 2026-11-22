@@ -1,4 +1,5 @@
 import { type DateKey, diffDays } from "./dates";
+import { DEFAULT_NOTIFICATIONS, type NotificationPrefs } from "./model";
 import type { Task } from "./tasks";
 
 export type ReminderType = "overdue" | "today" | "soon-test" | "tomorrow";
@@ -13,11 +14,19 @@ export interface Reminder {
 
 const ORDER: Record<ReminderType, number> = { overdue: 0, today: 1, "soon-test": 2, tomorrow: 3 };
 
+function wanted(type: ReminderType, graded: boolean, prefs: NotificationPrefs): boolean {
+  if (type === "overdue") return prefs.overdue;
+  if (type === "soon-test") return prefs.tests;
+  // Oggi/domani: una verifica segue la preferenza «verifiche», un compito quella delle scadenze.
+  return graded ? prefs.tests : prefs.dueSoon;
+}
+
 /**
  * Promemoria calcolati sui dati dello studente (nessun invio esterno):
- * scaduti, in scadenza oggi, verifiche/interrogazioni nei prossimi 3 giorni, in scadenza domani.
+ * scaduti, in scadenza oggi, verifiche/interrogazioni nei prossimi giorni, in scadenza domani.
+ * Le preferenze dello studente (Impostazioni) decidono quali tipi mostrare e con quanto anticipo.
  */
-export function buildReminders(tasks: readonly Task[], today: DateKey): Reminder[] {
+export function buildReminders(tasks: readonly Task[], today: DateKey, prefs: NotificationPrefs = DEFAULT_NOTIFICATIONS): Reminder[] {
   const out: Reminder[] = [];
   for (const task of tasks) {
     if (task.done) continue;
@@ -26,8 +35,10 @@ export function buildReminders(tasks: readonly Task[], today: DateKey): Reminder
     let type: ReminderType | null = null;
     if (days < 0) type = "overdue";
     else if (days === 0) type = "today";
-    else if (graded && days <= 3) type = "soon-test";
+    else if (graded && days <= prefs.testDays) type = "soon-test";
     else if (days === 1) type = "tomorrow";
+    // Verifiche e interrogazioni dipendono solo dalla loro preferenza; il resto da quella del tipo.
+    if (type && !wanted(type, graded, prefs)) type = null;
     if (type) out.push({ id: `${type}-${task.id}`, type, task, days });
   }
   return out.sort((a, b) => ORDER[a.type] - ORDER[b.type] || a.days - b.days || a.task.title.localeCompare(b.task.title));
