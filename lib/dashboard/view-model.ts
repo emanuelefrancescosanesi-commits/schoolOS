@@ -1,5 +1,6 @@
 import { averageDelta, overallAverage, overallTrend, requiredGrade, subjectAverages } from "@/lib/domain/averages";
 import { type DateKey, diffDays, isWithin, weekOf } from "@/lib/domain/dates";
+import { eventsAsTasks } from "@/lib/domain/events";
 import { type GradeStanding, gradeStanding } from "@/lib/domain/grading";
 import type { CalendarEvent, InboxMessage, SchoolData, Subject } from "@/lib/domain/model";
 import { currentPeriod } from "@/lib/domain/periods";
@@ -112,7 +113,9 @@ export function buildDashboard(data: SchoolData, today: DateKey, hour: number): 
     return { date, isToday: date === today, items: [...fromEvents, ...fromTasks] };
   });
 
-  const next7 = openTasks.filter((t) => {
+  // Verifiche, interrogazioni e progetti inseriti nel calendario contano come impegni in arrivo.
+  const commitments = [...openTasks, ...eventsAsTasks(data.events).filter((t) => t.due >= today)];
+  const next7 = commitments.filter((t) => {
     const d = diffDays(today, t.due);
     return d >= 0 && d <= 7;
   });
@@ -140,7 +143,7 @@ export function buildDashboard(data: SchoolData, today: DateKey, hour: number): 
           subject: subjectById.get(g.subjectId)!,
         })),
     },
-    upcoming: upcomingAssessments(openTasks, today, 14).map(toRow),
+    upcoming: upcomingAssessments(commitments, today, 14).map(toRow),
     tasks: sortByPriority(openTasks, ctx).map(toRow),
     messages: [...data.messages]
       .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))

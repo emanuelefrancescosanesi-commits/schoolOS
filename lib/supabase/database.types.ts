@@ -153,6 +153,32 @@ export type TimetableSlotRow = {
   created_at: string;
 };
 
+export type EventRow = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  title: string;
+  kind: "test" | "oral" | "project" | "homework" | "event";
+  starts_on: string;
+  starts_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InboxMessageRow = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  source: "manual" | "email" | "registro" | "calendar";
+  sender: string;
+  title: string;
+  body: string;
+  received_at: string;
+  is_read: boolean;
+  created_at: string;
+};
+
 type ExtensionTokenRow = {
   id: string;
   user_id: string;
@@ -188,6 +214,8 @@ export type Database = {
         TimetableSlotRow,
         Insertable<Omit<TimetableSlotRow, Exclude<Generated, "id">>, "weekday" | "starts_at" | "ends_at">
       >;
+      events: Table<EventRow, Insertable<Omit<EventRow, Generated>, "title" | "starts_on">>;
+      inbox_messages: Table<InboxMessageRow, Insertable<Omit<InboxMessageRow, Exclude<Generated, "id">>, "title">>;
       // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
       extension_tokens: Table<ExtensionTokenRow, never, never>;
     };

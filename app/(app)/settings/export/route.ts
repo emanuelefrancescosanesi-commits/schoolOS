@@ -7,10 +7,15 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Non autenticato", { status: 401 });
   const supabase = await createClient();
-  const tables = ["profiles", "school_years", "periods", "subjects", "grades", "assignments", "todo_projects", "todo_labels", "todos", "todo_label_links"] as const;
+  const tables = ["profiles", "school_years", "periods", "subjects", "grades", "assignments", "todo_projects", "todo_labels", "todos", "todo_label_links", "events", "inbox_messages"] as const;
   const out: Record<string, unknown> = { exportedAt: new Date().toISOString(), email: user.email };
   for (const t of tables) {
     const { data, error } = await supabase.from(t).select("*");
+    // Tabella di una migrazione non ancora applicata: nessun dato da esportare.
+    if (error?.code === "PGRST205" || error?.code === "42P01") {
+      out[t] = [];
+      continue;
+    }
     if (error) return new NextResponse("Esportazione non riuscita", { status: 500 });
     out[t] = data;
   }

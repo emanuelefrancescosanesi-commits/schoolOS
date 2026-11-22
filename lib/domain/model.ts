@@ -55,15 +55,20 @@ export interface InboxMessage {
   time: string;
   unread: boolean;
   subjectId?: string;
+  /** Testo completo (le comunicazioni incollate a mano); le demo hanno solo l'anteprima. */
+  body?: string;
 }
+
+export type EventKind = "test" | "oral" | "homework" | "project" | "event";
 
 export interface CalendarEvent {
   id: string;
   title: string;
   date: DateKey;
   time?: string;
-  kind: "test" | "oral" | "homework" | "project" | "event";
+  kind: EventKind;
   subjectId?: string;
+  notes?: string;
 }
 
 export interface SchoolData {

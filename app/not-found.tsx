@@ -12,7 +12,7 @@ export default function NotFound() {
       <h1 className="mt-1 text-3xl font-semibold tracking-tight">{m.notFound.title}</h1>
       <p className="mt-2 text-muted">{m.notFound.body}</p>
       <Link href="/dashboard" className={buttonVariants({ variant: "primary", className: "mt-8" })}>
-        {m.placeholder.back}
+        {m.notFound.back}
       </Link>
     </main>
   );

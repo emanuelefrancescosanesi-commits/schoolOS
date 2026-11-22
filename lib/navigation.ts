@@ -26,14 +26,14 @@ export interface NavItem {
   group: keyof Messages["nav"]["groups"];
   /** Voce fissa nella barra inferiore su smartphone. */
   mobile?: boolean;
-  /** Pagina già realizzata; le altre mostrano "In arrivo". */
+  /** Pagina realizzata. Oggi lo sono tutte: non esiste più la scheda «In arrivo». */
   ready?: boolean;
 }
 
 export const NAV_ITEMS: NavItem[] = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboardIcon, group: "main", mobile: true, ready: true },
   { key: "mySchool", href: "/my-school", icon: SchoolIcon, group: "main", mobile: true, ready: true },
-  { key: "inbox", href: "/inbox", icon: InboxIcon, group: "main", mobile: true },
+  { key: "inbox", href: "/inbox", icon: InboxIcon, group: "main", mobile: true, ready: true },
   { key: "assistant", href: "/assistant", icon: SparklesIcon, group: "main", ready: true },
   { key: "grades", href: "/grades", icon: GraduationCapIcon, group: "study", ready: true },
   { key: "analytics", href: "/analytics", icon: ChartLineIcon, group: "study", ready: true },
@@ -53,9 +53,6 @@ export const NAV_GROUPS = ["main", "study", "system"] as const;
 export const MOBILE_ITEMS: NavItem[] = ["dashboard", "mySchool", "tasks", "inbox"].map(
   (key) => NAV_ITEMS.find((i) => i.key === key)!,
 );
-
-/** Le sezioni non ancora realizzate, servite dalla pagina "In arrivo". */
-export const PLACEHOLDER_SLUGS = NAV_ITEMS.filter((i) => !i.ready).map((i) => i.href.slice(1));
 
 export function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);

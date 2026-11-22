@@ -23,7 +23,7 @@ async function Calendar() {
         <h1 className="text-3xl font-semibold tracking-tight">{getMessages().nav.calendar}</h1>
         <p className="mt-1 text-sm text-muted">{getMessages().calendarPage.intro}</p>
       </div>
-      <MonthView tasks={data.tasks} subjects={data.subjects} today={today} />
+      <MonthView tasks={data.tasks} events={data.events} subjects={data.subjects} today={today} demo={data.isDemo} />
     </div>
   );
 }
