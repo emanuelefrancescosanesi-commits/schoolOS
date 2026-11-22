@@ -1,7 +1,7 @@
 "use client";
 
 import { AlignLeftIcon, CalendarIcon, ListChecksIcon, RepeatIcon, SchoolIcon } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { TouchCheck } from "@/components/ui/touch-check";
 import type { Subject } from "@/lib/domain/model";
 import { getMessages } from "@/lib/i18n";
 import { dueLabel } from "@/lib/todo/format";
@@ -14,10 +14,10 @@ const t = getMessages().todo;
 
 /** Colore del cerchio per priorità: oltre al colore, il nome è sempre nel testo accessibile. */
 const PRIORITY_RING: Record<TodoPriority, string> = {
-  1: "border-critical data-[state=checked]:bg-critical data-[state=checked]:border-critical",
-  2: "border-warning data-[state=checked]:bg-warning data-[state=checked]:border-warning",
-  3: "border-accent-text data-[state=checked]:bg-accent data-[state=checked]:border-accent",
-  4: "border-muted/60",
+  1: "border-critical group-data-[state=checked]:border-critical group-data-[state=checked]:bg-critical",
+  2: "border-warning group-data-[state=checked]:border-warning group-data-[state=checked]:bg-warning",
+  3: "border-accent-text",
+  4: "",
 };
 
 const TONE: Record<string, string> = {
@@ -48,11 +48,12 @@ export function TodoRow({ node, ctx, parentTitle }: { node: TodoNode; ctx: RowCo
 
   return (
     <li className="group flex items-start gap-3 border-b border-border/60 py-2.5 last:border-b-0">
-      <Checkbox
+      <TouchCheck
         checked={done}
         onCheckedChange={() => ctx.onToggle(todo.id)}
         aria-label={`${done ? t.markUndone(todo.title) : t.markDone(todo.title)}${todo.priority < 4 ? ` (${t.priorityName[todo.priority]})` : ""}`}
-        className={cn("mt-0.5 size-5 rounded-full border-2", PRIORITY_RING[todo.priority])}
+        className="mt-px"
+        ringClassName={PRIORITY_RING[todo.priority]}
       />
       <button
         type="button"
