@@ -59,3 +59,32 @@ export function readImportHash(hash: string): string | null {
     return null;
   }
 }
+
+const STASH_KEY = "schoolos.import-stash";
+
+/**
+ * Il segnalibro può aprire SchoolOS senza sessione (es. Safari, che non condivide il login con la
+ * PWA): il login rimanda alla pagina senza il frammento e il testo andrebbe perso. Si tiene da
+ * parte nella scheda (sessionStorage) fino al ritorno su Voti.
+ */
+export function stashImportHash(hash: string, storage: Pick<Storage, "setItem">): boolean {
+  if (!readImportHash(hash)) return false;
+  try {
+    storage.setItem(STASH_KEY, hash);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Testo messo da parte prima del login; si legge una volta sola. */
+export function takeStashedImport(storage: Pick<Storage, "getItem" | "removeItem">): string | null {
+  try {
+    const hash = storage.getItem(STASH_KEY);
+    if (!hash) return null;
+    storage.removeItem(STASH_KEY);
+    return readImportHash(hash);
+  } catch {
+    return null;
+  }
+}

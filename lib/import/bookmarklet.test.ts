@@ -53,3 +53,24 @@ describe("readImportHash", () => {
     expect(readImportHash("#import=%E0%A4%A")).toBeNull();
   });
 });
+
+describe("testo del segnalibro conservato durante il login", () => {
+  const mem = () => {
+    const m = new Map<string, string>();
+    return { setItem: (k: string, v: string) => void m.set(k, v), getItem: (k: string) => m.get(k) ?? null, removeItem: (k: string) => void m.delete(k) };
+  };
+  it("lo tiene da parte e lo restituisce una sola volta", async () => {
+    const { stashImportHash, takeStashedImport } = await import("@/lib/import/bookmarklet");
+    const s = mem();
+    expect(stashImportHash("#import=Matematica%0A29%2F09%2F2026%20Scritto%208", s)).toBe(true);
+    expect(takeStashedImport(s)).toBe("Matematica\n29/09/2026 Scritto 8");
+    expect(takeStashedImport(s)).toBeNull();
+  });
+  it("ignora frammenti che non sono del segnalibro", async () => {
+    const { stashImportHash, takeStashedImport } = await import("@/lib/import/bookmarklet");
+    const s = mem();
+    expect(stashImportHash("#altro=1", s)).toBe(false);
+    expect(stashImportHash("", s)).toBe(false);
+    expect(takeStashedImport(s)).toBeNull();
+  });
+});

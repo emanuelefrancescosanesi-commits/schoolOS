@@ -14,7 +14,7 @@ import { ExtensionLink } from "@/components/grades/extension-link";
 import { type DateKey, isDateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
-import { buildBookmarklet, buildRegistryBookmarklet, readImportHash } from "@/lib/import/bookmarklet";
+import { buildBookmarklet, buildRegistryBookmarklet, readImportHash, takeStashedImport } from "@/lib/import/bookmarklet";
 import { MAX_IMAGE_BYTES, MAX_TEXT_CHARS } from "@/lib/import/input";
 import { readScreenshot } from "@/lib/import/ocr";
 import type { GradeKind, ImportRow } from "@/lib/import/normalize";
@@ -98,7 +98,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
 
   // Testo portato dal segnalibro: lo togliamo subito dall'indirizzo e lo analizziamo.
   useEffect(() => {
-    const text = readImportHash(window.location.hash);
+    const text = readImportHash(window.location.hash) ?? takeStashedImport(window.sessionStorage);
     if (!text) return;
     const id = setTimeout(() => {
       history.replaceState(null, "", window.location.pathname + window.location.search);
