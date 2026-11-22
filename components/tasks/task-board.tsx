@@ -58,11 +58,12 @@ export function TaskBoard({ tasks, subjects, today, demo }: Props) {
     const parsed = taskInputSchema.safeParse(input);
     if (!parsed.success) return setError(parsed.error.issues[0].message);
     const reset = () => {
-      setTitle("");
+      // Se nel frattempo hai già scritto un altro titolo, non cancellarlo.
+      setTitle((current) => (current === title ? "" : current));
       setError(null);
     };
     if (demo) {
-      setDemoTasks((l) => [...l, { id: crypto.randomUUID(), title: parsed.data.title, subjectId, kind, due, done: false }]);
+      setDemoTasks((l) => [...l, { id: crypto.randomUUID(), title: parsed.data.title, subjectId: parsed.data.subject_id, kind: parsed.data.kind, due: parsed.data.due_on, done: false }]);
       return reset();
     }
     start(async () => {
