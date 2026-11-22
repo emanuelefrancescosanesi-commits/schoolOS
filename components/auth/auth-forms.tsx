@@ -158,7 +158,12 @@ export function SignUpForm() {
         </Field>
         <label className="flex items-start gap-2.5 text-xs text-muted">
           <input type="checkbox" name="consent" required className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
-          {m.consent}
+          <span>
+            {m.consent}{" "}
+            <Link href="/privacy" target="_blank" className="text-accent-text underline">
+              {m.consentRead}
+            </Link>
+          </span>
         </label>
         <SubmitButton>{m.signUp}</SubmitButton>
       </form>
