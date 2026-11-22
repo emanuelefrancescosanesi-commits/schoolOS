@@ -142,6 +142,38 @@ export const it = {
     priorityHigh: "Urgente",
     remove: (title: string) => `Elimina: ${title}`,
   },
+  analyticsPage: {
+    intro: "Come stai andando, dove sei instabile e che voto ti serve per arrivare a una media.",
+    periods: {
+      title: "Confronto tra periodi",
+      empty: "Nessun periodo configurato.",
+      current: "In corso",
+      noGrades: "Nessun voto",
+      count: (n: number) => (n === 1 ? "1 voto" : `${n} voti`),
+    },
+    watch: {
+      title: "Materie da tenere d'occhio",
+      notEnough: "Servono almeno due voti in una materia per vedere l'andamento.",
+      allGood: "Nessuna materia altalenante o in calo.",
+      unstable: "Altalenante",
+      falling: "In calo",
+      explain: (max: number) =>
+        `Altalenante: voti molto diversi tra loro (scarto alto sulla scala fino a ${max}). In calo: gli ultimi 3 voti sono almeno mezzo punto sotto i precedenti.`,
+    },
+    simulator: {
+      title: "Che voto mi serve?",
+      empty: "Aggiungi qualche voto per usare il simulatore.",
+      subject: "Materia",
+      target: "Media da raggiungere",
+      weight: "Peso della prova",
+      weights: { half: "Mezzo (test breve)", normal: "Normale", double: "Doppio (compito importante)" },
+      currentAverage: "Media attuale:",
+      reached: "Hai già raggiunto questa media. Attenzione: un voto basso la può far scendere di nuovo.",
+      reachable: (v: string) => `Alla prossima prova ti serve almeno ${v}.`,
+      unreachable: (best: string) => `Con una sola prova non basta: anche con il massimo arrivi a ${best}.`,
+      invalidTarget: (min: string, max: string) => `Scrivi un valore tra ${min} e ${max}.`,
+    },
+  },
   timetablePage: {
     intro: "Le tue lezioni della settimana. Aggiungile una volta sola.",
     now: "In corso",
