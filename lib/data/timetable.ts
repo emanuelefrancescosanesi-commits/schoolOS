@@ -27,6 +27,8 @@ export async function getTimetable(): Promise<TimetableSlot[]> {
   }
   const supabase = await createClient();
   const { data, error } = await supabase.from("timetable_slots").select("*").order("starts_at");
+  // Migrazione non ancora applicata: orario vuoto invece di un errore.
+  if (error?.code === "PGRST205" || error?.code === "42P01") return [];
   if (error) throw new Error(error.message);
   return data.map((r) => ({
     id: r.id,
