@@ -2,7 +2,7 @@
 
 Sezione `/todo` (voce «Da fare» nel menu, accanto a «Compiti» che resta la lista degli impegni della scuola). Funziona nella **base gratuita**: nessuna AI, nessun costo per uso.
 Gli impegni della scuola (compiti, verifiche, interrogazioni) restano nella tabella `assignments` (Dashboard, Notifiche, «Compiti»)
-e **da `20261122140000_unify_tasks.sql` ogni compito ha sempre un'attività collegata in «Da fare»**: nascono, si modificano,
+e **da `20261122150000_unify_tasks.sql` ogni compito ha sempre un'attività collegata in «Da fare»**: nascono, si modificano,
 si spuntano e si eliminano insieme (trigger nel database, vale per qualunque scrittura). La lista «Da fare» è anche lo spazio
 personale dello studente per tutto il resto.
 
@@ -62,7 +62,7 @@ Il parser è puro e deterministico: `lib/todo/quick-add.ts`.
 - Aggiunta vocale e modelli (es. «settimana di verifiche»); AI per Pro (spezzare un compito in sotto-attività).
 - Offline vero (coda di scritture) nella PWA: oggi serve la rete per salvare.
 
-## Compiti ↔ Da fare: un'unica fonte (migrazione `20261122140000_unify_tasks.sql`)
+## Compiti ↔ Da fare: un'unica fonte (migrazione `20261122150000_unify_tasks.sql`)
 
 | Evento | Effetto sull'altro lato |
 |---|---|
