@@ -122,3 +122,8 @@ export function ceilToStep(value: number, scale: GradingScale): number {
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+/** Quanti dei voti dati non sarebbero più ammessi da `scale` (es. dopo aver tolto i mezzi voti). */
+export function countGradesOutsideScale(values: readonly number[], scale: GradingScale): number {
+  return values.filter((v) => !isAllowedGrade(v, scale)).length;
+}

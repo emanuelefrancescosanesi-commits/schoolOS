@@ -27,7 +27,7 @@ async function Notifications() {
   const m = getMessages();
   const t = m.notificationsPage;
   const subjectById = new Map(data.subjects.map((s) => [s.id, s]));
-  const reminders = buildReminders(data.tasks, today);
+  const reminders = buildReminders(data.tasks, today, data.profile.notifications);
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
