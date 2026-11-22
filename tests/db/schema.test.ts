@@ -132,6 +132,31 @@ describe.skipIf(!url)("schema e RLS", () => {
       ).rejects.toThrow(/foreign key/);
     });
 
+    it("un voto si modifica solo se è proprio, e la scala resta rispettata", async () => {
+      const id = await db.asUser(alice, async (q) => {
+        const r = await q<{ id: string }>(
+          "insert into public.grades (subject_id, value, graded_on) values ($1, 6, '2026-10-01') returning id",
+          [await subjectId(q)],
+        );
+        return r.rows[0].id;
+      });
+      // Bob non vede il voto di Alice: l'update non tocca nessuna riga.
+      const other = await db.asUser(bob, (q) => q("update public.grades set value = 10 where id = $1", [id]));
+      expect(other.rowCount).toBe(0);
+      // Alice lo modifica (voto, peso, data, tipo, nota) e updated_at si aggiorna.
+      const mine = await db.asUser(alice, (q) =>
+        q(
+          "update public.grades set value = 7.75, weight = 2, kind = 'oral', graded_on = '2026-10-05', description = 'Rifatta' where id = $1 returning value, weight",
+          [id],
+        ),
+      );
+      expect(mine.rows[0]).toMatchObject({ value: "7.75", weight: "2.00" });
+      // Fuori scala: rifiutato anche in modifica.
+      await expect(db.asUser(alice, (q) => q("update public.grades set value = 6.3 where id = $1", [id]))).rejects.toThrow(
+        /grades_value_quarter/,
+      );
+    });
+
     it("update e delete sulle righe altrui non toccano nulla", async () => {
       const res = await db.asUser(alice, async (q) => {
         const u = await q("update public.subjects set name = 'X' where user_id = $1", [bob]);
