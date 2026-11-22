@@ -11,6 +11,7 @@ import { Field, FormMessage } from "@/components/ui/label";
 import {
   type AuthFormState,
   requestPasswordReset,
+  resendConfirmation,
   signInWithGoogle,
   signInWithPassword,
   signUp,
@@ -55,6 +56,24 @@ function GoogleButton() {
   );
 }
 
+function ResendConfirmation({ email }: { email: string }) {
+  const m = getMessages().auth;
+  const [state, action] = useActionState(resendConfirmation, {});
+  return (
+    <form action={action} className="flex flex-col gap-2">
+      <input type="hidden" name="email" value={email} />
+      {state.error && <FormMessage tone="error">{state.error}</FormMessage>}
+      {state.notice ? (
+        <FormMessage tone="notice">{state.notice}</FormMessage>
+      ) : (
+        <Button type="submit" className="w-full">
+          {m.resendConfirmation}
+        </Button>
+      )}
+    </form>
+  );
+}
+
 function Divider() {
   return (
     <div className="flex items-center gap-3 text-xs text-muted" aria-hidden>
@@ -95,6 +114,7 @@ export function LoginForm() {
         </Link>
         <SubmitButton>{m.signIn}</SubmitButton>
       </form>
+      {state.needsConfirmation && state.fields?.email && <ResendConfirmation email={state.fields.email} />}
       <p className="text-center text-sm text-muted">
         {m.noAccount}{" "}
         <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="text-accent-text hover:underline">
