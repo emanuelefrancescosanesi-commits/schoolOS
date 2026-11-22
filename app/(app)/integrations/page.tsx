@@ -46,7 +46,7 @@ async function Integrations() {
           </p>
           <p className="text-muted">{t.registro.body}</p>
           <p>
-            <Link href="/grades" className="font-medium text-accent underline-offset-4 hover:underline">
+            <Link href="/grades" className="tap-area font-medium text-accent-text underline-offset-4 hover:underline">
               {t.registro.cta}
             </Link>
           </p>

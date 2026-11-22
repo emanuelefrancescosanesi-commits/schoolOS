@@ -13,6 +13,8 @@ export const it = {
     demoBanner: "Modalità demo: stai vedendo dati di esempio, non i tuoi.",
     demoBadge: "Demo",
     retry: "Riprova",
+    offlineBanner: "Sei offline: le modifiche non verranno salvate finché non torna la connessione.",
+    loading: "Caricamento…",
     seeAll: "Vedi tutto",
     close: "Chiudi",
     today: "Oggi",

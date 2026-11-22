@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <header className="flex h-16 items-center px-6">
-        <Link href="/login" className="rounded-control" aria-label={m.meta.appName}>
+        <Link href="/login" className="tap-area rounded-control" aria-label={m.meta.appName}>
           <Logo />
         </Link>
       </header>

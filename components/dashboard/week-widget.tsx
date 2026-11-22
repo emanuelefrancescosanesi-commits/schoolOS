@@ -29,7 +29,7 @@ export function WeekWidget({ week }: { week: DayCell[] }) {
   return (
     <WidgetCard id="week" title={m.dashboard.widgets.week} icon={CalendarDaysIcon} href="/calendar">
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-7 gap-1" role="group" aria-label={m.dashboard.widgets.week}>
+        <div className="grid grid-cols-7 gap-0 sm:gap-1" role="group" aria-label={m.dashboard.widgets.week}>
           {week.map((d, i) => {
             const isSelected = i === selected;
             return (

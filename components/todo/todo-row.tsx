@@ -57,7 +57,7 @@ export function TodoRow({ node, ctx, parentTitle }: { node: TodoNode; ctx: RowCo
       <button
         type="button"
         onClick={() => ctx.onOpen(todo.id)}
-        className="min-w-0 flex-1 rounded-control text-left outline-offset-4"
+        className="min-h-11 min-w-0 flex-1 rounded-control text-left outline-offset-4"
       >
         {parentTitle && <span className="block truncate text-xs text-muted">{parentTitle}</span>}
         <span className={cn("block break-words text-sm font-medium", done && "text-muted line-through")}>{todo.title}</span>

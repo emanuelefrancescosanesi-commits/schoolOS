@@ -17,7 +17,7 @@ export async function AccountMenu() {
         type="submit"
         aria-label={m.signOut}
         title={m.signOut}
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
+        className="inline-flex size-8 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
       >
         <LogOutIcon strokeWidth={1.5} className="size-4" />
       </button>
