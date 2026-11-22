@@ -56,6 +56,16 @@ function GoogleButton() {
   );
 }
 
+function ResendButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" disabled={pending} aria-disabled={pending}>
+      {pending && <LoaderCircleIcon className="animate-spin" aria-hidden />}
+      {label}
+    </Button>
+  );
+}
+
 function ResendConfirmation({ email }: { email: string }) {
   const m = getMessages().auth;
   const [state, action] = useActionState(resendConfirmation, {});
@@ -66,9 +76,7 @@ function ResendConfirmation({ email }: { email: string }) {
       {state.notice ? (
         <FormMessage tone="notice">{state.notice}</FormMessage>
       ) : (
-        <Button type="submit" className="w-full">
-          {m.resendConfirmation}
-        </Button>
+        <ResendButton label={m.resendConfirmation} />
       )}
     </form>
   );
@@ -114,7 +122,7 @@ export function LoginForm() {
         </Link>
         <SubmitButton>{m.signIn}</SubmitButton>
       </form>
-      {state.needsConfirmation && state.fields?.email && <ResendConfirmation email={state.fields.email} />}
+      {state.needsConfirmation && state.fields?.email && <ResendConfirmation key={state.fields.email} email={state.fields.email} />}
       <p className="text-center text-sm text-muted">
         {m.noAccount}{" "}
         <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="text-accent-text hover:underline">
