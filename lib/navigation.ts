@@ -42,7 +42,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: "timetable", href: "/timetable", icon: CalendarClockIcon, group: "study" },
   { key: "notifications", href: "/notifications", icon: BellIcon, group: "system" },
   { key: "integrations", href: "/integrations", icon: PlugIcon, group: "system" },
-  { key: "settings", href: "/settings", icon: SettingsIcon, group: "system" },
+  { key: "settings", href: "/settings", icon: SettingsIcon, group: "system", ready: true },
 ];
 
 export const NAV_GROUPS = ["main", "study", "system"] as const;
