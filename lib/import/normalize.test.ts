@@ -56,6 +56,31 @@ describe("matchSubject", () => {
     expect(matchSubject("Matematlca", subjects)?.id).toBe("mat");
   });
 
+  it("«Storia dell'arte» trova «Disegno e storia dell'arte» (apostrofi curvi, maiuscole, ordine)", () => {
+    for (const g of ["Storia dell'arte", "STORIA DELL’ARTE", "storia dell arte", "Storia dell'arte e disegno"]) {
+      expect(matchSubject(g, subjects)?.id, g).toBe("arte");
+    }
+  });
+
+  it("riconosce i sinonimi usati dai registri", () => {
+    const more = [...subjects.filter((s) => s.id !== "mot"), { id: "rel", name: "Religione" }, { id: "civ", name: "Educazione civica" }, { id: "mot2", name: "Scienze motorie e sportive" }];
+    expect(matchSubject("Ed. fisica", more)?.id).toBe("mot2");
+    expect(matchSubject("IRC", more)?.id).toBe("rel");
+    expect(matchSubject("Ed. civica", more)?.id).toBe("civ");
+    expect(matchSubject("Lingua e letteratura italiana", more)?.id).toBe("ita");
+    expect(matchSubject("Lingua e cultura straniera (Inglese)", more)?.id).toBe("ing");
+  });
+
+  it("una materia diversa non si fonde con una più lunga", () => {
+    const only = subjects.filter((s) => s.id !== "sto");
+    expect(matchSubject("Fisica", only)).toBeNull();
+    expect(matchSubject("Storia", only, { fuzzy: false })).toBeNull();
+  });
+
+  it("senza fuzzy non indovina gli errori di lettura", () => {
+    expect(matchSubject("Matematlca", subjects, { fuzzy: false })).toBeNull();
+  });
+
   it("restituisce null per materie sconosciute o vuote", () => {
     expect(matchSubject("Chimica", subjects)).toBeNull();
     expect(matchSubject("   ", subjects)).toBeNull();

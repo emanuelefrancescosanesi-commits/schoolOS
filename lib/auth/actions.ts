@@ -6,12 +6,15 @@ import { z } from "zod";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { authErrorMessage } from "./errors";
+import { resolveSiteOrigin } from "./origin";
 import { safeNextPath } from "./redirect";
 
 export interface AuthFormState {
   error?: string;
   /** Messaggio di successo che non porta a un redirect (es. "controlla la tua email"). */
   notice?: string;
+  /** Il login è fallito perché l'email non è ancora confermata: mostra «Rimanda il link». */
+  needsConfirmation?: boolean;
   fields?: { email?: string; first_name?: string };
 }
 
@@ -25,14 +28,17 @@ const NOT_CONFIGURED: AuthFormState = {
   error: "L'accesso non è ancora attivo: Supabase non è configurato. Puoi esplorare l'app in modalità demo.",
 };
 
-/** Origine pubblica del sito, per i link nelle email e il ritorno da Google. */
+/** Origine pubblica del sito, per i link nelle email e il ritorno da Google (vedi origin.ts). */
 async function siteOrigin(): Promise<string> {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL;
-  if (configured) return configured.replace(/\/$/, "");
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
+  return resolveSiteOrigin({
+    configured: process.env.NEXT_PUBLIC_SITE_URL,
+    vercelProductionHost: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    vercelDeployHost: process.env.VERCEL_URL,
+    host: h.get("x-forwarded-host") ?? h.get("host"),
+    proto: h.get("x-forwarded-proto"),
+    production: process.env.NODE_ENV === "production",
+  });
 }
 
 export async function signInWithPassword(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
@@ -46,7 +52,7 @@ export async function signInWithPassword(_prev: AuthFormState, formData: FormDat
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { error: authErrorMessage(error), fields };
+  if (error) return { error: authErrorMessage(error), needsConfirmation: error.code === "email_not_confirmed", fields };
 
   redirect(safeNextPath(String(formData.get("next") ?? "")));
 }
@@ -97,6 +103,22 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
   });
   if (error || !data.url) redirect("/login?error=oauth");
   redirect(data.url);
+}
+
+/** Rimanda l'email di conferma (utile quando il primo link è scaduto o finito in spam). */
+export async function resendConfirmation(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  if (!isSupabaseConfigured()) return NOT_CONFIGURED;
+  const parsed = email.safeParse(formData.get("email"));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data,
+    options: { emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=/onboarding` },
+  });
+  if (error) return { error: authErrorMessage(error) };
+  return { notice: `Email rimandata a ${parsed.data}. Controlla anche la cartella spam.` };
 }
 
 export async function requestPasswordReset(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {

@@ -8,6 +8,7 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   ListChecksIcon,
+  ListTodoIcon,
   type LucideIcon,
   PlugIcon,
   SchoolIcon,
@@ -31,17 +32,18 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { key: "dashboard", href: "/dashboard", icon: LayoutDashboardIcon, group: "main", mobile: true, ready: true },
-  { key: "mySchool", href: "/my-school", icon: SchoolIcon, group: "main", mobile: true },
+  { key: "mySchool", href: "/my-school", icon: SchoolIcon, group: "main", mobile: true, ready: true },
   { key: "inbox", href: "/inbox", icon: InboxIcon, group: "main", mobile: true },
-  { key: "assistant", href: "/assistant", icon: SparklesIcon, group: "main" },
+  { key: "assistant", href: "/assistant", icon: SparklesIcon, group: "main", ready: true },
   { key: "grades", href: "/grades", icon: GraduationCapIcon, group: "study", ready: true },
-  { key: "analytics", href: "/analytics", icon: ChartLineIcon, group: "study" },
+  { key: "analytics", href: "/analytics", icon: ChartLineIcon, group: "study", ready: true },
   { key: "subjects", href: "/subjects", icon: BookOpenIcon, group: "study", ready: true },
   { key: "tasks", href: "/tasks", icon: ListChecksIcon, group: "study", mobile: true, ready: true },
-  { key: "calendar", href: "/calendar", icon: CalendarDaysIcon, group: "study" },
-  { key: "timetable", href: "/timetable", icon: CalendarClockIcon, group: "study" },
-  { key: "notifications", href: "/notifications", icon: BellIcon, group: "system" },
-  { key: "integrations", href: "/integrations", icon: PlugIcon, group: "system" },
+  { key: "todo", href: "/todo", icon: ListTodoIcon, group: "study", ready: true },
+  { key: "calendar", href: "/calendar", icon: CalendarDaysIcon, group: "study", ready: true },
+  { key: "timetable", href: "/timetable", icon: CalendarClockIcon, group: "study", ready: true },
+  { key: "notifications", href: "/notifications", icon: BellIcon, group: "system", ready: true },
+  { key: "integrations", href: "/integrations", icon: PlugIcon, group: "system", ready: true },
   { key: "settings", href: "/settings", icon: SettingsIcon, group: "system", ready: true },
 ];
 

@@ -1,6 +1,6 @@
 # Lista «Da fare» (stile Todoist, su misura per studenti)
 
-Sezione `/tasks` (voce «Da fare» nel menu). Funziona nella **base gratuita**: nessuna AI, nessun costo per uso.
+Sezione `/todo` (voce «Da fare» nel menu, accanto a «Compiti» che resta la lista degli impegni della scuola). Funziona nella **base gratuita**: nessuna AI, nessun costo per uso.
 Gli impegni della scuola (compiti, verifiche, interrogazioni) restano nella tabella `assignments` e si possono
 importare con un tocco; la lista «Da fare» è lo spazio personale dello studente, per tutto il resto.
 
@@ -35,7 +35,7 @@ importare con un tocco; la lista «Da fare» è lo spazio personale dello studen
 Ciò che non viene riconosciuto resta nel titolo. Le parti riconosciute appaiono come chip sotto il campo prima dell'invio.
 Il parser è puro e deterministico: `lib/todo/quick-add.ts`.
 
-## Dati (migrazione `20261122120000_todo.sql`)
+## Dati (migrazione `20261122130000_todo.sql`)
 
 - `todo_projects`, `todo_labels`, `todos`, `todo_label_links`, tutte con `user_id` e RLS «solo i propri dati».
 - Chiavi esterne **composte** `(id, user_id)`: nessuno può agganciare una propria attività a lista, materia o compito altrui.
@@ -43,12 +43,12 @@ Il parser è puro e deterministico: `lib/todo/quick-add.ts`.
 - Limiti per account (anti-abuso, app pubblica): 5000 attività, 60 liste, 100 etichette.
 - Eliminare materia/compito collegato scollega soltanto (`on delete set null (colonna)`, richiede Postgres 15+: ok su Supabase).
 - Le tabelle sono incluse nell'esportazione dati (GDPR, art. 20) e spariscono con l'account (`on delete cascade`).
-- **Da applicare** sul progetto Supabase come le altre migrazioni (SQL Editor, dopo `delete_my_account`).
+- **Da applicare** sul progetto Supabase come le altre migrazioni (SQL Editor, dopo `security_hardening`).
 
 ## Architettura
 
 - `lib/todo/` — dominio puro e testato: `quick-add.ts`, `recurrence.ts`, `complete.ts` (stessa logica su server e client), `views.ts`, `format.ts`.
-- `app/(app)/tasks/actions.ts` — azioni server: zod, client dell'utente (quindi RLS), restituiscono le righe salvate.
+- `app/(app)/todo/actions.ts` — azioni server: zod, client dell'utente (quindi RLS), restituiscono le righe salvate.
 - `components/todo/use-todo-store.ts` — stato client **ottimistico** con rollback per singola attività se il server rifiuta; in demo tutto resta locale.
 - `lib/data/todo-data.ts` — lettura: attività aperte + completate negli ultimi 30 giorni, compiti importabili.
 

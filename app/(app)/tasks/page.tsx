@@ -1,21 +1,29 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { TodoApp } from "@/components/todo/todo-app";
+import { TaskBoard } from "@/components/tasks/task-board";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTodoPageData } from "@/lib/data/todo-data";
+import { getSchoolContext } from "@/lib/data/school-data";
 import { getMessages } from "@/lib/i18n";
 
-export const metadata: Metadata = { title: getMessages().todo.title };
+export const metadata: Metadata = { title: getMessages().nav.tasks };
 
 export default function TasksPage() {
   return (
-    <Suspense fallback={<Skeleton className="mx-auto h-96 w-full max-w-5xl" aria-busy="true" />}>
-      <Todos />
+    <Suspense fallback={<Skeleton className="h-96 w-full" aria-busy="true" />}>
+      <Tasks />
     </Suspense>
   );
 }
 
-async function Todos() {
-  const { subjects, ...data } = await getTodoPageData();
-  return <TodoApp data={data} subjects={subjects} />;
+async function Tasks() {
+  const { data, today } = await getSchoolContext();
+  return (
+    <div className="flex max-w-2xl flex-col gap-6">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">{getMessages().nav.tasks}</h1>
+        <p className="mt-1 text-sm text-muted">{getMessages().tasksPage.intro}</p>
+      </div>
+      <TaskBoard tasks={data.tasks} subjects={data.subjects} today={today} demo={data.isDemo} />
+    </div>
+  );
 }

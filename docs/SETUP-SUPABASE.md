@@ -58,6 +58,8 @@ ha limiti bassi di invio ed è pensato solo per i test.
 
 ## 4. Accesso con Google
 
+> Guida passo-passo per non tecnici (Google Cloud, Supabase, Resend): [SETUP-GOOGLE-SMTP.md](SETUP-GOOGLE-SMTP.md).
+
 1. In [Google Cloud Console](https://console.cloud.google.com) crea un progetto.
 2. *APIs & Services → OAuth consent screen*: tipo **External**, nome "SchoolOS", email di supporto.
    Per ora bastano gli scope `openid`, `email`, `profile`.

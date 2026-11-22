@@ -203,3 +203,8 @@ grant select, insert, update, delete
   on public.todo_projects, public.todo_labels, public.todos, public.todo_label_links
   to authenticated;
 revoke all on public.todo_projects, public.todo_labels, public.todos, public.todo_label_links from anon;
+
+-- Le funzioni-trigger non sono richiamabili dall'API (come in 20261122120000_security_hardening).
+revoke all on function public.enforce_todo_shape() from public, anon, authenticated;
+revoke all on function public.todos_follow_parent() from public, anon, authenticated;
+revoke all on function public.enforce_todo_limits() from public, anon, authenticated;

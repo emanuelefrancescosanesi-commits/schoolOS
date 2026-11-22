@@ -2,11 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "env": {
+    "NEXT_PUBLIC_SITE_URL": "https://school-os-brown.vercel.app",
     "NEXT_PUBLIC_SUPABASE_URL": "https://oduqbzifwhrunwunuvkl.supabase.co",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_56vDPXkvmsStkApG7akvsQ_OJz0UV_b"
   },
   "build": {
     "env": {
+      "NEXT_PUBLIC_SITE_URL": "https://school-os-brown.vercel.app",
       "NEXT_PUBLIC_SUPABASE_URL": "https://oduqbzifwhrunwunuvkl.supabase.co",
       "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_56vDPXkvmsStkApG7akvsQ_OJz0UV_b"
     }

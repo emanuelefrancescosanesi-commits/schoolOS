@@ -138,6 +138,17 @@ export type TodoRow = {
 
 export type TodoLabelLinkRow = { todo_id: string; label_id: string; user_id: string };
 
+export type TimetableSlotRow = {
+  id: string;
+  user_id: string;
+  subject_id: string | null;
+  weekday: number;
+  starts_at: string;
+  ends_at: string;
+  room: string | null;
+  created_at: string;
+};
+
 type ExtensionTokenRow = {
   id: string;
   user_id: string;
@@ -169,6 +180,10 @@ export type Database = {
       todo_labels: Table<TodoLabelRow, Insertable<Omit<TodoLabelRow, "id" | "user_id" | "created_at">, "name">>;
       todos: Table<TodoRow, Insertable<Omit<TodoRow, Generated>, "title">>;
       todo_label_links: Table<TodoLabelLinkRow, Insertable<Omit<TodoLabelLinkRow, "user_id">, "todo_id" | "label_id">>;
+      timetable_slots: Table<
+        TimetableSlotRow,
+        Insertable<Omit<TimetableSlotRow, Exclude<Generated, "id">>, "weekday" | "starts_at" | "ends_at">
+      >;
       // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
       extension_tokens: Table<ExtensionTokenRow, never, never>;
     };

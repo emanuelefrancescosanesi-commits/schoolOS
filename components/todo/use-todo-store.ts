@@ -12,7 +12,7 @@ import {
   toggleTodo,
   updateProject,
   updateTodo,
-} from "@/app/(app)/tasks/actions";
+} from "@/app/(app)/todo/actions";
 import { completionPatch, applyCompletion } from "@/lib/todo/complete";
 import { dueLabel } from "@/lib/todo/format";
 import type { ImportableAssignment, Todo, TodoLabel, TodoProject } from "@/lib/todo/types";

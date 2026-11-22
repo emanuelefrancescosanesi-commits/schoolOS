@@ -10,6 +10,7 @@ const longDay = fmt({ weekday: "long", day: "numeric", month: "long" });
 const shortWeekday = fmt({ weekday: "short" });
 const dayMonth = fmt({ day: "numeric", month: "short" });
 const shortDate = fmt({ day: "numeric", month: "short" });
+const monthYear = fmt({ month: "long", year: "numeric" });
 
 /** "giovedì 19 novembre" */
 export function formatLongDay(key: DateKey): string {
@@ -36,4 +37,9 @@ export function dayOfMonth(key: DateKey): number {
 
 export function capitalize(text: string): string {
   return text.charAt(0).toLocaleUpperCase(locale) + text.slice(1);
+}
+
+/** "novembre 2026" */
+export function formatMonthYear(key: DateKey): string {
+  return monthYear.format(dateKeyToDate(key));
 }
