@@ -66,7 +66,7 @@ Stime: **S** < 1 h, **M** 1–3 h, **L** > 3 h. Priorità: **P0** funzione manca
 
 | # | Pri | Problema | File | Stima |
 |---|---|---|---|---|
-| 7.1 | P1 | 64 test DB saltati senza Postgres: far girare postgres nella CI (GitHub Actions) così non restano ciechi. Verificare che esista un workflow CI. | `.github/workflows/`, `tests/db/*` | M |
+| 7.1 | P2 | I 64 test DB girano solo in CI (Postgres già configurato in `ci.yml`), non in locale senza `TEST_DATABASE_URL`: documentarlo nel README. | `README.md` | S |
 | 7.2 | P1 | Nessun test dei componenti React (task board, grades view, wizard, quick-add) né delle server action (validazione input, utenti non autenticati). | `components/*`, `app/**/actions.ts` | L |
 | 7.3 | P1 | Migrazioni non ancora applicate in Supabase (a mano da Emanuele): `20261122100000_delete_my_account`, `20261122110000_match_materie`, `20261122110500_timetable`, `20261122120000_security_hardening`, `20261122130000_todo`. Prima dell'apertura ad altri: SMTP + conferma email, CAPTCHA, piano Pro Supabase. | `supabase/migrations/` | S (guida) |
 | 7.4 | P2 | Rate limit e tetti: verificare azioni add* contro invio massivo (oltre ai tetti righe). | `app/**/actions.ts` | S |
