@@ -282,6 +282,7 @@ export const it = {
     signIn: "Accedi",
     signUp: "Crea account",
     google: "Continua con Google",
+    resendConfirmation: "Rimanda l'email di conferma",
     or: "oppure",
     forgot: "Password dimenticata?",
     sendLink: "Invia il link",
@@ -296,6 +297,8 @@ export const it = {
     exploreDemo: "Esplora la demo",
     queryErrors: {
       oauth: "Accesso con Google non riuscito. Riprova.",
+      oauth_denied: "Hai annullato l'accesso con Google. Puoi riprovare o usare email e password.",
+      oauth_unavailable: "L'accesso con Google non è ancora attivo. Usa email e password.",
       link: "Il link non è valido o è scaduto. Richiedine uno nuovo.",
       not_configured: "L'accesso non è ancora attivo su questa installazione.",
     } as Record<string, string>,
