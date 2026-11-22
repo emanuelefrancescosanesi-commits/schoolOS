@@ -46,6 +46,11 @@ export function hourInTimeZone(now: Date, timeZone: string): number {
   return Number(hour);
 }
 
+/** Ora locale "HH:MM" di `instant` nel fuso orario dell'utente. */
+export function timeInTimeZone(instant: Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(instant);
+}
+
 export function addDays(key: DateKey, days: number): DateKey {
   return fromUtcMs(toUtcMs(key) + days * DAY_MS);
 }

@@ -80,3 +80,34 @@ describe("buildDashboard con il dataset demo", () => {
     expect(keys).toEqual([...keys].sort().reverse());
   });
 });
+
+describe("buildDashboard con eventi del calendario", () => {
+  const today = "2026-11-23";
+  it("le verifiche inserite nel calendario compaiono tra gli impegni in arrivo e nel riepilogo", () => {
+    const data = buildDemoDataset(today);
+    const base = buildDashboard(data, today, 10);
+    const withEvent = buildDashboard(
+      { ...data, events: [...data.events, { id: "ev-x", title: "Verifica sui limiti", date: "2026-11-25", kind: "test" }] },
+      today,
+      10,
+    );
+    expect(withEvent.upcoming.some((r) => r.task.title === "Verifica sui limiti")).toBe(true);
+    expect(withEvent.summary.tests).toBe(base.summary.tests + 1);
+  });
+  it("gli eventi generici o già passati non diventano impegni", () => {
+    const data = buildDemoDataset(today);
+    const base = buildDashboard(data, today, 10);
+    const vm = buildDashboard(
+      {
+        ...data,
+        events: [
+          { id: "g", title: "Assemblea", date: "2026-11-25", kind: "event" },
+          { id: "p", title: "Verifica passata", date: "2026-11-01", kind: "test" },
+        ],
+      },
+      today,
+      10,
+    );
+    expect(vm.upcoming.map((r) => r.task.id)).toEqual(base.upcoming.map((r) => r.task.id));
+  });
+});

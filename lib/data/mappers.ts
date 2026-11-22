@@ -1,9 +1,10 @@
 import type { Grade } from "@/lib/domain/averages";
+import { dateKeyInTimeZone, timeInTimeZone } from "@/lib/domain/dates";
 import type { GradingScale } from "@/lib/domain/grading";
-import type { SchoolData, StudentProfile, Subject } from "@/lib/domain/model";
+import type { CalendarEvent, InboxMessage, SchoolData, StudentProfile, Subject } from "@/lib/domain/model";
 import type { Period } from "@/lib/domain/periods";
 import type { Task } from "@/lib/domain/tasks";
-import type { AssignmentRow, GradeRow, PeriodRow, ProfileRow, SubjectRow } from "@/lib/supabase/database.types";
+import type { AssignmentRow, EventRow, GradeRow, InboxMessageRow, PeriodRow, ProfileRow, SubjectRow } from "@/lib/supabase/database.types";
 
 /** Conversioni pure dalle righe del database al modello del dominio. */
 
@@ -60,12 +61,40 @@ export const taskFromRow = (a: AssignmentRow): Task => ({
   done: a.status === "done",
 });
 
+export const eventFromRow = (e: EventRow): CalendarEvent => ({
+  id: e.id,
+  title: e.title,
+  date: e.starts_on,
+  time: e.starts_at ? e.starts_at.slice(0, 5) : undefined,
+  kind: e.kind,
+  subjectId: e.subject_id ?? undefined,
+  notes: e.notes ?? undefined,
+});
+
+export function messageFromRow(m: InboxMessageRow, timeZone: string): InboxMessage {
+  const at = new Date(m.received_at);
+  return {
+    id: m.id,
+    source: m.source,
+    from: m.sender,
+    subject: m.title,
+    preview: m.body.replace(/\s+/g, " ").slice(0, 140),
+    body: m.body,
+    date: dateKeyInTimeZone(at, timeZone),
+    time: timeInTimeZone(at, timeZone),
+    unread: !m.is_read,
+    subjectId: m.subject_id ?? undefined,
+  };
+}
+
 export function toSchoolData(rows: {
   profile: ProfileRow;
   subjects: SubjectRow[];
   periods: PeriodRow[];
   grades: GradeRow[];
   assignments: AssignmentRow[];
+  events?: EventRow[];
+  messages?: InboxMessageRow[];
 }): SchoolData {
   return {
     profile: profileFromRow(rows.profile),
@@ -73,9 +102,8 @@ export function toSchoolData(rows: {
     periods: [...rows.periods].sort((a, b) => a.position - b.position).map(periodFromRow),
     grades: rows.grades.map(gradeFromRow),
     tasks: rows.assignments.map(taskFromRow),
-    // Comunicazioni ed eventi arrivano con le integrazioni (Fase 3b).
-    messages: [],
-    events: [],
+    messages: (rows.messages ?? []).map((m) => messageFromRow(m, rows.profile.time_zone)),
+    events: (rows.events ?? []).map(eventFromRow),
     isDemo: false,
   };
 }

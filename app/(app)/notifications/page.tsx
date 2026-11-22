@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSchoolContext } from "@/lib/data/school-data";
+import { eventsAsTasks, isEventTask } from "@/lib/domain/events";
 import { buildReminders } from "@/lib/domain/reminders";
 import { formatDayMonth } from "@/lib/format";
 import { getMessages } from "@/lib/i18n";
@@ -27,7 +28,7 @@ async function Notifications() {
   const m = getMessages();
   const t = m.notificationsPage;
   const subjectById = new Map(data.subjects.map((s) => [s.id, s]));
-  const reminders = buildReminders(data.tasks, today);
+  const reminders = buildReminders([...data.tasks, ...eventsAsTasks(data.events)], today);
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
@@ -45,7 +46,7 @@ async function Notifications() {
             const subject = subjectById.get(r.task.subjectId);
             return (
               <li key={r.id}>
-                <Link href="/tasks" className="block">
+                <Link href={isEventTask(r.task) ? "/calendar" : "/tasks"} className="block">
                   <Card className="flex-row items-center gap-3 p-3">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{r.task.title}</p>
