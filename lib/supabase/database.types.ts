@@ -105,6 +105,39 @@ export type AssignmentRow = {
   updated_at: string;
 };
 
+export type TodoProjectRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  color: number;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TodoLabelRow = { id: string; user_id: string; name: string; created_at: string };
+
+export type TodoRow = {
+  id: string;
+  user_id: string;
+  project_id: string | null;
+  parent_id: string | null;
+  title: string;
+  notes: string | null;
+  due_on: string | null;
+  due_time: string | null;
+  priority: number;
+  recurrence: Json | null;
+  subject_id: string | null;
+  assignment_id: string | null;
+  completed_at: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TodoLabelLinkRow = { todo_id: string; label_id: string; user_id: string };
+
 type ExtensionTokenRow = {
   id: string;
   user_id: string;
@@ -132,6 +165,10 @@ export type Database = {
       subjects: Table<SubjectRow, Insertable<Omit<SubjectRow, Generated>, "school_year_id" | "name" | "color">>;
       grades: Table<GradeRow, Insertable<Omit<GradeRow, Exclude<Generated, "id">>, "subject_id" | "value" | "graded_on">>;
       assignments: Table<AssignmentRow, Insertable<Omit<AssignmentRow, Generated>, "title" | "due_on">>;
+      todo_projects: Table<TodoProjectRow, Insertable<Omit<TodoProjectRow, Generated>, "name">>;
+      todo_labels: Table<TodoLabelRow, Insertable<Omit<TodoLabelRow, "id" | "user_id" | "created_at">, "name">>;
+      todos: Table<TodoRow, Insertable<Omit<TodoRow, Generated>, "title">>;
+      todo_label_links: Table<TodoLabelLinkRow, Insertable<Omit<TodoLabelLinkRow, "user_id">, "todo_id" | "label_id">>;
       // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
       extension_tokens: Table<ExtensionTokenRow, never, never>;
     };

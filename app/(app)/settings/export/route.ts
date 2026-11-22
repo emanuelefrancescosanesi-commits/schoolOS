@@ -7,7 +7,7 @@ export async function GET() {
   const user = await getCurrentUser();
   if (!user) return new NextResponse("Non autenticato", { status: 401 });
   const supabase = await createClient();
-  const tables = ["profiles", "school_years", "periods", "subjects", "grades", "assignments"] as const;
+  const tables = ["profiles", "school_years", "periods", "subjects", "grades", "assignments", "todo_projects", "todo_labels", "todos", "todo_label_links"] as const;
   const out: Record<string, unknown> = { exportedAt: new Date().toISOString(), email: user.email };
   for (const t of tables) {
     const { data, error } = await supabase.from(t).select("*");
