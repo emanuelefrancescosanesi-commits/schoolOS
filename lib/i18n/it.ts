@@ -142,6 +142,25 @@ export const it = {
     priorityHigh: "Urgente",
     remove: (title: string) => `Elimina: ${title}`,
   },
+  integrationsPage: {
+    intro: "Da dove arrivano i tuoi dati. Niente è obbligatorio e puoi scollegare tutto quando vuoi.",
+    registro: {
+      title: "Registro elettronico",
+      grades: (n: number) => (n === 0 ? "Nessun voto importato" : n === 1 ? "1 voto" : `${n} voti`),
+      body: "I voti si importano dalla pagina Voti: incollando il testo, da uno screenshot o con l'estensione sul PC. La password del registro non passa mai da SchoolOS.",
+      cta: "Vai a importare i voti",
+    },
+    extension: {
+      title: "Estensione del browser (PC)",
+      body: "Sincronizza i voti da sola quando apri il registro dal computer.",
+      demo: "Disponibile con un account.",
+    },
+    mail: {
+      title: "Email e calendario",
+      soon: "In arrivo",
+      body: "Gmail, Outlook e Google Calendar arriveranno più avanti. Prima serve la verifica di sicurezza di Google: non li attiviamo finché i tuoi dati non sono protetti come richiesto.",
+    },
+  },
   analyticsPage: {
     intro: "Come stai andando, dove sei instabile e che voto ti serve per arrivare a una media.",
     periods: {
