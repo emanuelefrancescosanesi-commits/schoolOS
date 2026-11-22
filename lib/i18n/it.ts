@@ -142,6 +142,18 @@ export const it = {
     priorityHigh: "Urgente",
     remove: (title: string) => `Elimina: ${title}`,
   },
+  mySchoolPage: {
+    intro: "La tua scuola in una pagina: anno, periodi e materie con i docenti.",
+    noSchool: "Scuola non indicata",
+    year: (label: string) => `Anno scolastico ${label}`,
+    periods: "Periodi",
+    current: "In corso",
+    subjects: "Materie e docenti",
+    noTeacher: "Docente non indicato",
+    average: "Media",
+    noGrades: "Nessun voto",
+    openTasks: (n: number) => (n === 0 ? "Nessun impegno aperto" : n === 1 ? "1 impegno aperto" : `${n} impegni aperti`),
+  },
   integrationsPage: {
     intro: "Da dove arrivano i tuoi dati. Niente è obbligatorio e puoi scollegare tutto quando vuoi.",
     registro: {

@@ -15,6 +15,8 @@ export type RegistroProvider = "classeviva" | "argo" | "axios" | "altro" | "ness
 
 export interface StudentProfile {
   firstName: string;
+  schoolName?: string;
+  className?: string;
   timeZone: string;
   scale: GradingScale;
   averageMethod: AverageMethod;
