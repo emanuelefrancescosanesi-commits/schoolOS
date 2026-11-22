@@ -1,0 +1,36 @@
+/** Testi dell'interfaccia dell'Assistente. */
+export const assistantMessages = {
+  title: "Assistente",
+  intro: "Ti spiego come usare SchoolOS, in poche righe.",
+  privacy: "Non vede i tuoi voti né i tuoi dati. Non scrivere password o dati personali.",
+  placeholder: "Scrivi una domanda…",
+  inputLabel: "La tua domanda",
+  send: "Invia",
+  thinking: "Sto scrivendo…",
+  you: "Tu",
+  assistant: "Assistente",
+  suggestionsTitle: "Prova a chiedere",
+  suggestions: [
+    "Come importo i voti dal registro?",
+    "Come viene calcolata la media?",
+    "Come installo l'app sul telefono?",
+    "Come elimino il mio account?",
+  ],
+  newChat: "Nuova conversazione",
+  tooLong: (n: number) => `Massimo ${n} caratteri.`,
+  limit: (n: number) => `Hai raggiunto il limite di ${n} risposte per oggi. Riprova domani.`,
+  errors: {
+    generic: "Qualcosa non ha funzionato. Riprova.",
+    invalid: "Non ho capito la richiesta. Riprova con una domanda più corta.",
+    session: "La sessione è scaduta: ricarica la pagina e accedi di nuovo.",
+  },
+  blocked: {
+    demoTitle: "Non disponibile in modalità demo",
+    demoBody: "L'assistente funziona con un account. Intanto trovi le risposte principali provando l'app.",
+    offTitle: "Non ancora attivo",
+    offBody: "L'assistente non è ancora attivo. Lo accenderemo appena è pronto.",
+    proTitle: "Una funzione del piano Pro",
+    proBody: "L'assistente è incluso nel piano Pro. La base di SchoolOS resta gratuita: voti, medie e importazione a mano.",
+    back: "Vai ai voti",
+  },
+} as const;
