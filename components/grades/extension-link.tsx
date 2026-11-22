@@ -14,7 +14,7 @@ import { getMessages } from "@/lib/i18n";
 const m = getMessages().grades.import;
 
 /** Collegamento dell'estensione al proprio account: crea e revoca i codici. */
-export function ExtensionLink() {
+export function ExtensionLink({ defaultOpen = false }: { defaultOpen?: boolean } = {}) {
   const [codes, setCodes] = useState<ExtensionCode[]>([]);
   const [fresh, setFresh] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -54,7 +54,7 @@ export function ExtensionLink() {
   };
 
   return (
-    <details className="rounded-control border border-border p-3 text-sm">
+    <details open={defaultOpen || undefined} className="rounded-control border border-border p-3 text-sm">
       <summary className="cursor-pointer font-medium">{m.extTitle}</summary>
       <div className="mt-3 flex flex-col gap-3 text-muted">
         <p>{m.extIntro}</p>
@@ -80,6 +80,8 @@ export function ExtensionLink() {
                 <li key={c.id} className="flex items-center justify-between gap-3">
                   <span>
                     {c.label} · {c.lastUsedAt ? m.extLastUsed(new Date(c.lastUsedAt).toLocaleDateString("it-IT")) : m.extNever}
+                    {c.status.state === "expired" && <span className="text-critical"> · {m.extExpired}</span>}
+                    {c.status.state === "expiring" && <span className="text-warning"> · {m.extExpiring(c.status.daysLeft)}</span>}
                   </span>
                   <Button onClick={() => revoke(c.id)} disabled={pending}>
                     {m.extRevoke}
@@ -89,6 +91,7 @@ export function ExtensionLink() {
             </ul>
           </div>
         )}
+        <p className="text-xs">{m.extExpiryNote}</p>
         {error && <FormMessage tone="error">{error}</FormMessage>}
       </div>
     </details>

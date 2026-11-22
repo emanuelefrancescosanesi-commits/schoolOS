@@ -48,7 +48,11 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Il service worker va sempre riscaricato: così gli aggiornamenti arrivano subito.
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }] },
+    ];
   },
   async redirects() {
     // La landing pubblica arriva in una fase successiva: per ora "/" porta all'app.

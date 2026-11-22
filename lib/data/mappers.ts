@@ -28,6 +28,12 @@ export function profileFromRow(p: ProfileRow): StudentProfile {
     averageMethod: p.average_method,
     periodScheme: p.period_scheme ?? "trimestre-pentamestre",
     registro: p.registro,
+    notifications: {
+      overdue: p.notify_overdue,
+      dueSoon: p.notify_due_soon,
+      tests: p.notify_tests,
+      testDays: p.notify_test_days,
+    },
   };
 }
 

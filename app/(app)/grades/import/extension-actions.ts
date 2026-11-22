@@ -1,10 +1,11 @@
 "use server";
 
+import { type CodeStatus, codeStatus } from "@/lib/import/extension-codes";
 import { requireUser } from "@/lib/data/session";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-export type ExtensionCode = { id: string; label: string; createdAt: string; lastUsedAt: string | null };
+export type ExtensionCode = { id: string; label: string; createdAt: string; lastUsedAt: string | null; status: CodeStatus };
 
 /** Crea un codice di collegamento per l'estensione. Il codice in chiaro si vede solo ora. */
 export async function createExtensionCode(): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
@@ -26,7 +27,7 @@ export async function listExtensionCodes(): Promise<ExtensionCode[]> {
     .from("extension_tokens")
     .select("id,label,created_at,last_used_at")
     .order("created_at", { ascending: false });
-  return (data ?? []).map((r) => ({ id: r.id, label: r.label, createdAt: r.created_at, lastUsedAt: r.last_used_at }));
+  return (data ?? []).map((r) => ({ id: r.id, label: r.label, createdAt: r.created_at, lastUsedAt: r.last_used_at, status: codeStatus(r.created_at, r.last_used_at) }));
 }
 
 export async function revokeExtensionCode(id: string): Promise<boolean> {

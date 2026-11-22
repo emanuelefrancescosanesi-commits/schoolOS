@@ -38,6 +38,10 @@ export type ProfileRow = {
   pass_threshold: number;
   average_method: AverageMethodDb;
   dashboard_layout: Json | null;
+  notify_overdue: boolean;
+  notify_due_soon: boolean;
+  notify_tests: boolean;
+  notify_test_days: number;
   onboarding_completed_at: string | null;
   plan: PlanDb;
   created_at: string;
@@ -218,6 +222,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       complete_onboarding: { Args: { payload: Json }; Returns: string };
+      replace_periods: { Args: { p_year_id: string; p_scheme: PeriodScheme; p_year: Json; p_periods: Json }; Returns: string };
       create_extension_token: { Args: { p_label?: string }; Returns: string };
       sync_grades: { Args: { p_token: string; p_rows: Json }; Returns: Json };
       delete_my_account: { Args: Record<string, never>; Returns: undefined };

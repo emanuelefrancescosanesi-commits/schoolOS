@@ -1,4 +1,4 @@
-importScripts("config.js");
+importScripts("config.js", "sync-errors.js");
 
 // Riceve i voti letti dalla pagina del registro e li manda a SchoolOS con il codice di collegamento.
 chrome.runtime.onMessage.addListener((msg) => {
@@ -28,7 +28,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 async function sync(rows) {
   const { token } = await chrome.storage.local.get("token");
-  if (!token) return setStatus({ ok: false, text: "Collega l'estensione (Opzioni)" }, "!");
+  if (!token) return setStatus({ ok: false, text: "Collega l'estensione: incolla il codice nelle Opzioni", action: "relink", at: Date.now() }, "!");
   try {
     const res = await fetch(`${SCHOOLOS_SUPABASE_URL}/rest/v1/rpc/sync_grades`, {
       method: "POST",
@@ -36,14 +36,16 @@ async function sync(rows) {
       body: JSON.stringify({ p_token: token, p_rows: rows }),
     });
     if (!res.ok) {
-      return setStatus({ ok: false, text: res.status === 400 || res.status === 401 ? "Codice non valido: rifai il collegamento" : "Errore di rete" }, "!");
+      const err = classifySyncError(res.status, await res.text().catch(() => ""));
+      return setStatus({ ok: false, text: err.text, action: err.action, at: Date.now() }, "!");
     }
     const r = await res.json();
     let text = r.inserted > 0 ? `${r.inserted} voti nuovi inviati` : "Nessun voto nuovo";
     if (r.created && r.created.length) text += ` · materie create: ${r.created.join(", ")}`;
     await setStatus({ ok: true, text, unmatched: r.unmatched || [], at: Date.now() }, r.inserted > 0 ? String(r.inserted) : "");
   } catch {
-    await setStatus({ ok: false, text: "Errore di rete" }, "!");
+    const err = classifySyncError(0, "");
+    await setStatus({ ok: false, text: err.text, action: err.action, at: Date.now() }, "!");
   }
 }
 

@@ -11,13 +11,14 @@ import { Input, Select } from "@/components/ui/input";
 import { Field, FormMessage } from "@/components/ui/label";
 import { RegistryConnect } from "@/components/grades/registry-connect";
 import { ExtensionLink } from "@/components/grades/extension-link";
-import { type DateKey, isDateKey } from "@/lib/domain/dates";
+import { type DateKey } from "@/lib/domain/dates";
 import { type GradingScale, formatGrade, parseGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
 import { buildBookmarklet, buildRegistryBookmarklet, readImportHash, takeStashedImport } from "@/lib/import/bookmarklet";
 import { MAX_IMAGE_BYTES, MAX_TEXT_CHARS } from "@/lib/import/input";
 import { readScreenshot } from "@/lib/import/ocr";
-import type { GradeKind, ImportRow } from "@/lib/import/normalize";
+import type { GradeKind } from "@/lib/import/normalize";
+import { type Draft, rowProblem, selectRows, summarizeRows } from "@/lib/import/review";
 import { getMessages } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -25,18 +26,6 @@ interface Props {
   today: DateKey;
   scale: GradingScale;
   subjects: Subject[];
-}
-
-type Draft = ImportRow & { selected: boolean };
-
-/** Una riga è importabile quando materia, voto e data sono validi per lo studente. */
-function problem(row: Draft, scale: GradingScale, today: DateKey, hasSubject: (id: string) => boolean): string | null {
-  if (!row.subjectId || !hasSubject(row.subjectId)) return "Scegli la materia";
-  const parsed = parseGrade(row.valueText, scale);
-  if (!parsed.ok) return "Voto non valido per la tua scala";
-  if (!row.date || !isDateKey(row.date)) return "Data non valida";
-  if (row.date > today) return "La data è nel futuro";
-  return null;
 }
 
 export function ImportCard({ today, scale, subjects }: Props) {
@@ -68,6 +57,8 @@ export function ImportCard({ today, scale, subjects }: Props) {
       const text = await readScreenshot(file, (progress) => setOcr((o) => ({ ...o, progress })));
       if (textRef.current) textRef.current.value = text;
       setOcr({ busy: false, progress: 1, note: text ? m.ocrDone : m.ocrEmpty });
+      // Zero attrito: il testo letto passa subito all'anteprima, dove ogni riga si corregge.
+      if (text.trim()) analyzeText(text);
     } catch {
       setOcr({ busy: false, progress: 0, note: null });
       setError(m.ocrFailed);
@@ -83,6 +74,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
   const analyzeText = (text: string) => {
     setError(null);
     setDone(null);
+    if (!text.trim()) return setError(m.emptyText);
     // Lo screenshot è già stato letto sul dispositivo: al server arriva solo il testo.
     const data = new FormData();
     data.set("text", text);
@@ -140,7 +132,9 @@ export function ImportCard({ today, scale, subjects }: Props) {
   const update = (key: string, patch: Partial<Draft>) =>
     setRows((rs) => rs?.map((r) => (r.key === key ? { ...r, ...patch } : r)) ?? null);
 
-  const importable = rows?.filter((r) => r.selected && !problem(r, scale, today, (id) => subjectIds.has(id))) ?? [];
+  const problemOf = (r: Draft) => rowProblem(r, scale, today, (id) => subjectIds.has(id));
+  const importable = rows?.filter((r) => r.selected && !problemOf(r)) ?? [];
+  const summary = rows ? summarizeRows(rows, problemOf) : null;
 
   const confirm = () => {
     if (!rows) return;
@@ -195,6 +189,14 @@ export function ImportCard({ today, scale, subjects }: Props) {
                   name="text"
                   rows={6}
                   maxLength={MAX_TEXT_CHARS}
+                  onPaste={(e) => {
+                    // Incollare basta: se il testo è corposo si analizza da solo (il campo resta modificabile).
+                    const pasted = e.clipboardData.getData("text");
+                    if (pasted.length < 40 || e.currentTarget.value.trim()) return;
+                    e.preventDefault();
+                    e.currentTarget.value = pasted.slice(0, MAX_TEXT_CHARS);
+                    analyzeText(pasted);
+                  }}
                   placeholder={m.textPlaceholder}
                   className="min-h-32 w-full rounded-control border border-border bg-surface p-3 text-sm text-fg placeholder:text-muted/80 hover:border-muted/50 focus-visible:border-accent-text"
                 />
@@ -254,10 +256,26 @@ export function ImportCard({ today, scale, subjects }: Props) {
               <div>
                 <h3 className="text-base font-medium">{m.reviewTitle(rows.length)}</h3>
                 <p className="mt-1 text-sm text-muted">{m.reviewHint}</p>
+                {summary && (
+                  <p role="status" className="mt-2 text-sm font-medium">
+                    {m.summary(summary.importable, summary.duplicates, summary.toFix)}
+                  </p>
+                )}
               </div>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => setRows((rs) => (rs ? selectRows(rs, problemOf, true) : rs))}>
+                  {m.selectAll}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setRows((rs) => rs?.map((r) => ({ ...r, selected: false })) ?? null)}>
+                  {m.selectNone}
+                </Button>
+              </div>
+              {summary && summary.importable === 0 && summary.toFix === 0 && summary.duplicates === summary.total && (
+                <FormMessage tone="notice">{m.allDuplicates}</FormMessage>
+              )}
               <ul className="flex flex-col gap-2">
                 {rows.map((r) => {
-                  const issue = problem(r, scale, today, (id) => subjectIds.has(id));
+                  const issue = problemOf(r);
                   const parsed = parseGrade(r.valueText, scale);
                   const label = `${r.subjectGuess} ${r.valueText}`;
                   return (
@@ -320,7 +338,9 @@ export function ImportCard({ today, scale, subjects }: Props) {
                             {issue ? (
                               <Badge tone="critical">{issue}</Badge>
                             ) : (
-                              <Badge tone="warning">{m.duplicate}</Badge>
+                              <Badge tone="warning" title={m.duplicateHint}>
+                                {m.duplicate}
+                              </Badge>
                             )}
                             {parsed.ok && <span className="text-xs text-muted">{formatGrade(parsed.value, scale)}</span>}
                           </div>

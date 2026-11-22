@@ -3,7 +3,7 @@
 import { PlusIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { TouchCheck } from "@/components/ui/touch-check";
 import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -111,11 +111,11 @@ function Body({ todo, onClose, store, today, projects, subjects, labels, subtask
   return (
     <div className="mt-4 flex flex-col gap-5">
       <div className="flex items-start gap-3">
-        <Checkbox
+        <TouchCheck
           checked={done}
           onCheckedChange={() => void store.toggle(todo.id)}
           aria-label={done ? tt.markUndone(todo.title) : tt.markDone(todo.title)}
-          className="mt-2.5 size-5 rounded-full border-2"
+          className="mt-3.5"
         />
         <div className="flex-1">
           <Label htmlFor="todo-title" className="sr-only">
@@ -254,7 +254,7 @@ function Body({ todo, onClose, store, today, projects, subjects, labels, subtask
                 aria-pressed={on}
                 onClick={() => toggleLabel(l.name)}
                 className={cn(
-                  "h-8 pointer-coarse:h-10 rounded-full border px-3 text-xs",
+                  "h-8 pointer-coarse:h-11 rounded-full border px-3 text-xs",
                   on ? "border-accent-text bg-accent-soft font-medium text-accent-text" : "border-border text-muted hover:bg-surface-2",
                 )}
               >
@@ -286,11 +286,10 @@ function Body({ todo, onClose, store, today, projects, subjects, labels, subtask
           <ul className="flex flex-col">
             {subtasks.map((s) => (
               <li key={s.id} className="flex items-center gap-3 py-1.5">
-                <Checkbox
+                <TouchCheck
                   checked={s.completedAt !== null}
                   onCheckedChange={() => void store.toggle(s.id)}
                   aria-label={s.completedAt ? tt.markUndone(s.title) : tt.markDone(s.title)}
-                  className="size-[18px] rounded-full border-2"
                 />
                 <span className={cn("min-w-0 flex-1 break-words text-sm", s.completedAt && "text-muted line-through")}>{s.title}</span>
                 <Button variant="ghost" size="icon-sm" onClick={() => void store.remove(s.id)} aria-label={`${t.delete}: ${s.title}`}>

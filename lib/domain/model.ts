@@ -13,6 +13,17 @@ export type SourceId = "email" | "registro" | "calendar" | "manual";
 
 export type RegistroProvider = "classeviva" | "argo" | "axios" | "altro" | "nessuno";
 
+/** Quali promemoria mostrare nel centro notifiche. */
+export interface NotificationPrefs {
+  overdue: boolean;
+  dueSoon: boolean;
+  tests: boolean;
+  /** Con quanti giorni di anticipo avvisare di verifiche e interrogazioni. */
+  testDays: number;
+}
+
+export const DEFAULT_NOTIFICATIONS: NotificationPrefs = { overdue: true, dueSoon: true, tests: true, testDays: 3 };
+
 export interface StudentProfile {
   firstName: string;
   schoolName?: string;
@@ -22,6 +33,7 @@ export interface StudentProfile {
   averageMethod: AverageMethod;
   periodScheme: PeriodScheme;
   registro: RegistroProvider;
+  notifications: NotificationPrefs;
 }
 
 export interface Subject {

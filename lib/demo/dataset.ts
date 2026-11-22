@@ -1,7 +1,7 @@
 import type { Grade, GradeKind } from "@/lib/domain/averages";
 import { type DateKey, addDays } from "@/lib/domain/dates";
 import { DEFAULT_SCALE } from "@/lib/domain/grading";
-import type { CalendarEvent, InboxMessage, SchoolData, Subject } from "@/lib/domain/model";
+import { type CalendarEvent, DEFAULT_NOTIFICATIONS, type InboxMessage, type SchoolData, type Subject } from "@/lib/domain/model";
 import { type Period, currentPeriod, suggestedPeriods } from "@/lib/domain/periods";
 import type { Task } from "@/lib/domain/tasks";
 
@@ -155,6 +155,7 @@ export function buildDemoDataset(today: DateKey): SchoolData {
       averageMethod: "weighted",
       periodScheme: "trimestre-pentamestre",
       registro: "nessuno",
+      notifications: DEFAULT_NOTIFICATIONS,
     },
     subjects: SUBJECTS,
     periods,
