@@ -59,8 +59,36 @@ export interface NormalizeContext {
 }
 
 // ─── Materie ────────────────────────────────────────────────────────────────
+//
+// Il confronto dei nomi vive in due posti che devono dare lo stesso risultato: qui (anteprima
+// dell'import) e nella funzione SQL `public.match_subject` (sincronizzazione automatica, migrazione
+// 20261122110000). Il test `tests/subject-match-sql.test.ts` li fa girare sugli stessi casi.
+// Se cambi una regola, cambiala in entrambi.
 
-const STOP_WORDS = new Set(["e", "di", "del", "della", "dello", "dei", "delle", "il", "la", "lo", "l", "ed", "a"]);
+const STOP_WORDS = new Set([
+  "e", "ed", "di", "del", "dell", "della", "dello", "dei", "degli", "delle", "il", "la", "lo", "l", "le", "a", "al", "all",
+  "alla", "in", "nel", "nell", "nella", "per", "con", "su", "sul", "sull", "da", "dal", "dalla",
+]);
+
+/** Parole di contorno che i registri aggiungono o tolgono ("Lingua e cultura straniera"). */
+const NOISE_WORDS = new Set(["lingua", "letteratura", "cultura", "straniera", "straniere", "sportive", "sportiva", "sport"]);
+
+const WORD_ALIASES: Record<string, string> = {
+  italiana: "italiano",
+  tedesca: "tedesco",
+  spagnola: "spagnolo",
+  latina: "latino",
+  greca: "greco",
+  francese: "francese",
+};
+
+/** Sinonimi a più parole, applicati sul nome già normalizzato (prima di togliere le parole vuote). */
+const PHRASE_RULES: [RegExp, string][] = [
+  [/\b(?:ed|educ|educazione) fisica\b/g, "scienze motorie"],
+  [/\b(?:ed|educ) (civica|artistica|tecnica|musicale)\b/g, "educazione $1"],
+  [/\beducazione alla cittadinanza\b/g, "educazione civica"],
+  [/\b(?:insegnamento religione cattolica|insegnamento della religione cattolica|religione cattolica|irc|ire|relig)\b/g, "religione"],
+];
 
 /** Minuscolo, senza accenti né punteggiatura: "Storia dell'Arte" → "storia dell arte". */
 export function normalizeName(name: string): string {
@@ -72,10 +100,18 @@ export function normalizeName(name: string): string {
     .trim();
 }
 
+/** Termini significativi di una materia, dopo sinonimi e parole vuote. Ordine originale. */
 function tokens(name: string): string[] {
-  return normalizeName(name)
-    .split(" ")
-    .filter((t) => t && !STOP_WORDS.has(t));
+  let s = normalizeName(name);
+  for (const [re, to] of PHRASE_RULES) s = s.replace(re, to);
+  const all = s.split(" ").filter((t) => t && !STOP_WORDS.has(t)).map((t) => WORD_ALIASES[t] ?? t);
+  const significant = all.filter((t) => !NOISE_WORDS.has(t));
+  return significant.length ? significant : all;
+}
+
+/** Chiave canonica: stessi termini, in qualunque ordine, danno la stessa chiave. */
+export function subjectKey(name: string): string {
+  return tokens(name).sort().join(" ");
 }
 
 function bigrams(s: string): string[] {
@@ -110,33 +146,47 @@ const FUZZY_MARGIN = 0.08;
  * Trova la materia dello studente che corrisponde al nome letto dal registro.
  * Restituisce null se non c'è una corrispondenza chiara: meglio far scegliere
  * allo studente che attribuire un voto alla materia sbagliata.
+ *
+ * Livelli, dal più sicuro: 1) stessa chiave (maiuscole, accenti, apostrofi, ordine, sinonimi);
+ * 2) abbreviazione univoca ("mat", "ital"); 3) nome più corto contenuto in quello più lungo
+ * ("Storia dell'arte" ≈ "Disegno e storia dell'arte"), solo con almeno due termini per lato;
+ * 4) somiglianza (errori di lettura dell'OCR), solo in anteprima: la sincronizzazione automatica
+ * non la usa, perché lì nessuno conferma la riga.
  */
-export function matchSubject(guess: string, subjects: ImportSubject[]): ImportSubject | null {
-  const q = normalizeName(guess);
-  if (!q) return null;
-
-  const exact = subjects.filter((s) => normalizeName(s.name) === q);
-  if (exact.length === 1) return exact[0];
-
+export function matchSubject(guess: string, subjects: ImportSubject[], opts: { fuzzy?: boolean } = {}): ImportSubject | null {
+  const fuzzy = opts.fuzzy ?? true;
   const qTokens = tokens(guess);
-  if (qTokens.length) {
-    // Stessi termini significativi, in qualunque ordine ("Matematica e Fisica" ≈ "Fisica e Matematica").
-    const sameTokens = subjects.filter((s) => {
-      const t = tokens(s.name);
-      return t.length === qTokens.length && t.every((x) => qTokens.includes(x));
+  if (!qTokens.length) return null;
+  const qKey = [...qTokens].sort().join(" ");
+
+  const exact = subjects.filter((s) => subjectKey(s.name) === qKey);
+  if (exact.length === 1) return exact[0];
+  if (exact.length > 1) return null;
+
+  // Abbreviazioni: "mat", "ital", "ed fisica" → prefisso (stretto) di un solo nome.
+  if (qTokens.join("").length >= 3) {
+    const abbreviated = subjects.filter((s) => {
+      const st = tokens(s.name);
+      return (
+        qTokens.every((t) => st.some((u) => u.startsWith(t))) &&
+        qTokens.some((t) => st.some((u) => u.length > t.length && u.startsWith(t)))
+      );
     });
-    if (sameTokens.length === 1) return sameTokens[0];
+    if (abbreviated.length === 1) return abbreviated[0];
+    if (abbreviated.length > 1) return null;
   }
 
-  // Abbreviazioni: "mat", "ital", "ed fisica" → prefisso di un solo nome.
-  if (q.replace(/ /g, "").length >= 3) {
-    const prefixed = subjects.filter((s) => {
-      const name = normalizeName(s.name);
-      return name.startsWith(q) || qTokens.every((t) => tokens(s.name).some((u) => u.startsWith(t)));
-    });
-    if (prefixed.length === 1) return prefixed[0];
-  }
+  // Un nome contiene l'altro: serve almeno una coppia di termini, così "Storia" non si fonde con
+  // "Disegno e storia dell'arte".
+  const contained = subjects.filter((s) => {
+    const st = tokens(s.name);
+    if (qTokens.length >= 2 && qTokens.every((t) => st.includes(t))) return true;
+    return st.length >= 2 && st.every((t) => qTokens.includes(t));
+  });
+  if (contained.length === 1) return contained[0];
+  if (contained.length > 1) return null;
 
+  if (!fuzzy) return null;
   const ranked = subjects
     .map((s) => ({ s, score: similarity(guess, s.name) }))
     .sort((a, b) => b.score - a.score);
