@@ -26,6 +26,9 @@ describe.skipIf(!url)("cancellazione dell'account", () => {
       await db.asUser(u, (q) => q("select public.complete_onboarding($1)", [payload]));
       await db.asUser(u, (q) => q("select public.sync_my_grades($1)", [JSON.stringify([{ subject: "Matematica", value: 7, kind: "oral", date: "2026-10-01" }])]));
       await db.asUser(u, (q) => q("select public.create_extension_token()"));
+      // Righe senza materia: la FK composita non le copre, serve quella diretta verso l'utente.
+      await db.asUser(u, (q) => q("insert into public.assignments (title, due_on) values ('Senza materia', '2026-12-01')"));
+      await db.asUser(u, (q) => q("insert into public.timetable_slots (weekday, starts_at, ends_at) values (1, '08:00', '09:00')"));
     }
   }, 30_000);
 
@@ -37,11 +40,11 @@ describe.skipIf(!url)("cancellazione dell'account", () => {
     (await db.admin.query(`select count(*)::int as n from public.${table} where ${table === "profiles" ? "id" : "user_id"} = $1`, [user])).rows[0].n;
 
   it("elimina utente e tutti i suoi dati, e non tocca gli altri", async () => {
-    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens"]) expect(await count(t, alice)).toBeGreaterThan(0);
+    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens", "assignments", "timetable_slots", "todos"]) expect(await count(t, alice)).toBeGreaterThan(0);
     await db.asUser(alice, (q) => q("select public.delete_my_account()"));
-    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens"]) expect(await count(t, alice)).toBe(0);
+    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens", "assignments", "timetable_slots", "todos"]) expect(await count(t, alice)).toBe(0);
     expect((await db.admin.query("select count(*)::int as n from auth.users where id = $1", [alice])).rows[0].n).toBe(0);
-    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens"]) expect(await count(t, bob)).toBeGreaterThan(0);
+    for (const t of ["profiles", "school_years", "subjects", "grades", "extension_tokens", "assignments", "timetable_slots", "todos"]) expect(await count(t, bob)).toBeGreaterThan(0);
   });
 
   it("non è chiamabile senza sessione", async () => {
