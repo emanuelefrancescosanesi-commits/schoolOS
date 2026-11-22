@@ -102,7 +102,8 @@ export async function extractGrades(
       throw new ImportExtractionError("Il servizio è molto richiesto in questo momento. Riprova tra un minuto.");
     }
     if (error instanceof Anthropic.APIError) {
-      console.error("[import] errore API", error.status, error.message);
+      // Solo lo stato: il messaggio dell'API può citare parti del contenuto inviato (dati dello studente).
+      console.error("[import] errore API", error.status);
       throw new ImportExtractionError("Non sono riuscito a leggere i voti. Riprova tra poco.");
     }
     throw error;
