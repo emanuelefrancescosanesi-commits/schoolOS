@@ -39,3 +39,12 @@ export function currentOrNext(
   const next = day.find((s) => s.start > nowTime);
   return next ? { slot: next, state: "next" } : null;
 }
+
+/** Lezione dello stesso giorno che si sovrappone alla fascia indicata (fine di una = inizio dell'altra non conta). */
+export function findOverlap(
+  slots: readonly TimetableSlot[],
+  candidate: { weekday: number; start: string; end: string },
+  ignoreId?: string,
+): TimetableSlot | undefined {
+  return slots.find((s) => s.id !== ignoreId && s.weekday === candidate.weekday && candidate.start < s.end && s.start < candidate.end);
+}

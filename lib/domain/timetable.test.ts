@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type TimetableSlot, currentOrNext, isTime, slotsOfDay, trimTime, visibleWeekdays } from "./timetable";
+import { type TimetableSlot, currentOrNext, findOverlap, isTime, slotsOfDay, trimTime, visibleWeekdays } from "./timetable";
 
 const slot = (id: string, weekday: number, start: string, end: string): TimetableSlot => ({ id, weekday, start, end });
 const slots = [slot("b", 1, "09:00", "10:00"), slot("a", 1, "08:00", "09:00"), slot("c", 2, "08:00", "09:00")];
@@ -26,5 +26,18 @@ describe("orario", () => {
     expect(isTime("8:05")).toBe(false);
     expect(isTime("24:00")).toBe(false);
     expect(trimTime("08:05:00")).toBe("08:05");
+  });
+});
+
+describe("sovrapposizioni", () => {
+  it("rileva le fasce che si incrociano nello stesso giorno", () => {
+    expect(findOverlap(slots, { weekday: 1, start: "08:30", end: "09:30" })?.id).toBeDefined();
+    expect(findOverlap(slots, { weekday: 1, start: "07:00", end: "08:01" })?.id).toBe("a");
+  });
+  it("lezioni consecutive, altri giorni e la stessa lezione in modifica non si sovrappongono", () => {
+    expect(findOverlap(slots, { weekday: 1, start: "10:00", end: "11:00" })).toBeUndefined();
+    expect(findOverlap(slots, { weekday: 3, start: "08:00", end: "09:00" })).toBeUndefined();
+    expect(findOverlap(slots, { weekday: 1, start: "08:00", end: "09:30" }, "a")?.id).toBe("b");
+    expect(findOverlap(slots, { weekday: 1, start: "08:00", end: "09:00" }, "a")).toBeUndefined();
   });
 });

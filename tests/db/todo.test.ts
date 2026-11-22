@@ -117,22 +117,21 @@ describe.skipIf(!url)("lista Da fare: schema e RLS", () => {
     });
   });
 
-  it("eliminare la materia o il compito collegato scollega soltanto", async () => {
+  it("eliminare la materia scollega soltanto (l'attività resta)", async () => {
     await db.asUser(alice, async (q) => {
       const subject = await id(q, "insert into public.subjects (school_year_id, name, color) select id, 'Latino', 2 from public.school_years returning id");
-      const assignment = await id(q, "insert into public.assignments (title, due_on) values ('Versione', '2026-12-01') returning id");
-      const t = await id(q, "insert into public.todos (title, subject_id, assignment_id) values ('Collegata', $1, $2) returning id", [subject, assignment]);
+      const t = await id(q, "insert into public.todos (title, subject_id) values ('Con materia', $1) returning id", [subject]);
       await q("delete from public.subjects where id = $1", [subject]);
-      await q("delete from public.assignments where id = $1", [assignment]);
-      const row = (await q("select subject_id, assignment_id from public.todos where id = $1", [t])).rows[0];
-      expect(row).toEqual({ subject_id: null, assignment_id: null });
+      const row = (await q("select subject_id from public.todos where id = $1", [t])).rows[0];
+      expect(row).toEqual({ subject_id: null });
     });
   });
 
   it("un compito della scuola si collega a una sola attività", async () => {
     await db.asUser(alice, async (q) => {
+      // L'attività collegata nasce da sola (trigger): una seconda sullo stesso compito è rifiutata.
       const assignment = await id(q, "insert into public.assignments (title, due_on) values ('Tema', '2026-12-02') returning id");
-      await q("insert into public.todos (title, assignment_id) values ('a', $1)", [assignment]);
+      expect((await q("select 1 from public.todos where assignment_id = $1", [assignment])).rowCount).toBe(1);
       await expect(q("insert into public.todos (title, assignment_id) values ('b', $1)", [assignment])).rejects.toThrow(/duplicate key/);
     });
   });

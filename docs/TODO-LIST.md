@@ -1,8 +1,10 @@
 # Lista «Da fare» (stile Todoist, su misura per studenti)
 
 Sezione `/todo` (voce «Da fare» nel menu, accanto a «Compiti» che resta la lista degli impegni della scuola). Funziona nella **base gratuita**: nessuna AI, nessun costo per uso.
-Gli impegni della scuola (compiti, verifiche, interrogazioni) restano nella tabella `assignments` e si possono
-importare con un tocco; la lista «Da fare» è lo spazio personale dello studente, per tutto il resto.
+Gli impegni della scuola (compiti, verifiche, interrogazioni) restano nella tabella `assignments` (Dashboard, Notifiche, «Compiti»)
+e **da `20261122140000_unify_tasks.sql` ogni compito ha sempre un'attività collegata in «Da fare»**: nascono, si modificano,
+si spuntano e si eliminano insieme (trigger nel database, vale per qualunque scrittura). La lista «Da fare» è anche lo spazio
+personale dello studente per tutto il resto.
 
 ## Cosa c'è
 
@@ -59,3 +61,19 @@ Il parser è puro e deterministico: `lib/todo/quick-add.ts`.
 - Trascinamento per riordinare (`position` esiste già), vista Kanban.
 - Aggiunta vocale e modelli (es. «settimana di verifiche»); AI per Pro (spezzare un compito in sotto-attività).
 - Offline vero (coda di scritture) nella PWA: oggi serve la rete per salvare.
+
+## Compiti ↔ Da fare: un'unica fonte (migrazione `20261122140000_unify_tasks.sql`)
+
+| Evento | Effetto sull'altro lato |
+|---|---|
+| Nuovo compito | Nasce l'attività collegata (priorità dal tipo: verifica/interrogazione P1, progetto P2, compito P3) |
+| Compito modificato (titolo, note, scadenza, materia) o spuntato | L'attività si aggiorna |
+| Attività collegata modificata o spuntata | Il compito si aggiorna (titolo troncato a 140; scadenza vuota ignorata) |
+| Attività collegata **ricorrente** spuntata | Il compito non si chiude: scorre solo la scadenza |
+| Eliminazione di uno dei due | Si elimina anche l'altro (anche a cascata, es. materia eliminata) |
+| Compiti già esistenti | La migrazione crea le attività mancanti |
+
+Anti-ricorsione con il flag di transazione `app.task_sync`. Se il limite di 5000 attività è raggiunto il compito si salva comunque.
+In «Compiti» ora si può **modificare** un impegno (titolo, materia, tipo, scadenza) e c'è «Annulla» (6 s) dopo spunta/eliminazione.
+In «Orario» si può **modificare** una lezione; le fasce che si sovrappongono nello stesso giorno sono rifiutate (client e server).
+Spunte e pulsanti icona misurano 44×44 px (`components/ui/touch-check.tsx`).

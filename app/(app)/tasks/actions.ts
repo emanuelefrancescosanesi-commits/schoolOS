@@ -30,6 +30,28 @@ export async function addTask(input: Record<string, unknown>): Promise<TaskActio
   return { ok: true, task: data };
 }
 
+export async function updateTask(id: string, input: Record<string, unknown>): Promise<TaskActionResult> {
+  if (!isSupabaseConfigured()) return DEMO;
+  if (!z.uuid().safeParse(id).success) return { ok: false, error: "Impegno non valido." };
+  await requireUser("/tasks");
+  const parsed = taskInputSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
+  const { subject_id, estimated_minutes, ...rest } = parsed.data;
+  if (subject_id && !z.uuid().safeParse(subject_id).success) return { ok: false, error: "Materia non valida." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("assignments")
+    .update({ ...rest, subject_id: subject_id || null, ...(estimated_minutes !== undefined && { estimated_minutes }) })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) return { ok: false, error: "Non siamo riusciti a salvare. Riprova." };
+  if (!data) return { ok: false, error: "Impegno non trovato." };
+  refresh();
+  return { ok: true, task: data };
+}
+
 export async function setTaskDone(id: string, done: boolean): Promise<TaskActionResult> {
   if (!isSupabaseConfigured()) return DEMO;
   if (!z.uuid().safeParse(id).success) return { ok: false, error: "Impegno non valido." };
