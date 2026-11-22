@@ -59,7 +59,7 @@ Test: `lib/auth/origin.test.ts`, `tests/db/security-hardening.test.ts` (scadenza
 
 9. **Chi è il titolare del trattamento**: tu come persona, o la scuola? Se vai dal preside, la scuola dovrebbe essere titolare e tu **responsabile** (art. 28 GDPR, con contratto). Serve per completare `/privacy`, e per il consenso dei minori di 14 anni (lo raccoglie la scuola).
 10. **Contatto privacy** (email) da scrivere nell'informativa.
-11. **Anthropic**: prima di attivare l'AI, accettare il DPA nella console e valutare zero data retention. Finché non lo fai, lascia `IMPORT_AI_ENABLED` spento.
+11. **Anthropic**: prima di attivare l'AI, accettare il DPA nella console e valutare zero data retention. Finché non lo fai, non impostare `ANTHROPIC_API_KEY` su Vercel (senza chiave la lettura AI resta spenta).
 12. **Segnalare alla scuola** che si tratta dati di minori: per un uso su scala di istituto potrebbe servire una valutazione d'impatto (DPIA). Non è un blocco, ma il preside/DPO lo chiederà.
 
 ## Scelte annotate
