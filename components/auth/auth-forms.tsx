@@ -117,7 +117,7 @@ export function LoginForm() {
         <Field label={m.password} htmlFor="password">
           <Input id="password" name="password" type="password" autoComplete="current-password" required />
         </Field>
-        <Link href="/forgot-password" className="-mt-1 self-end text-xs text-accent-text hover:underline">
+        <Link href="/forgot-password" className="tap-area -mt-1 self-end text-xs text-accent-text hover:underline">
           {m.forgot}
         </Link>
         <SubmitButton>{m.signIn}</SubmitButton>
@@ -125,7 +125,7 @@ export function LoginForm() {
       {state.needsConfirmation && state.fields?.email && <ResendConfirmation key={state.fields.email} email={state.fields.email} />}
       <p className="text-center text-sm text-muted">
         {m.noAccount}{" "}
-        <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="text-accent-text hover:underline">
+        <Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"} className="tap-area text-accent-text underline underline-offset-2">
           {m.signUp}
         </Link>
       </p>
@@ -140,7 +140,7 @@ export function SignUpForm() {
     return (
       <div className="flex flex-col gap-4">
         <FormMessage tone="notice">{state.notice}</FormMessage>
-        <Link href="/login" className="text-center text-sm text-accent-text hover:underline">
+        <Link href="/login" className="tap-area self-center text-sm text-accent-text hover:underline">
           {m.backToLogin}
         </Link>
       </div>
@@ -185,10 +185,10 @@ export function SignUpForm() {
           />
         </Field>
         <label className="flex items-start gap-2.5 text-xs text-muted">
-          <input type="checkbox" name="consent" required className="mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
+          <input type="checkbox" name="consent" required className="tap-area mt-0.5 size-5 shrink-0 accent-[var(--accent)]" />
           <span>
             {m.consent}{" "}
-            <Link href="/privacy" target="_blank" className="text-accent-text underline">
+            <Link href="/privacy" target="_blank" className="tap-area text-accent-text underline">
               {m.consentRead}
             </Link>
           </span>
@@ -197,7 +197,7 @@ export function SignUpForm() {
       </form>
       <p className="text-center text-sm text-muted">
         {m.haveAccount}{" "}
-        <Link href="/login" className="text-accent-text hover:underline">
+        <Link href="/login" className="tap-area text-accent-text underline underline-offset-2">
           {m.signIn}
         </Link>
       </p>
@@ -219,7 +219,7 @@ export function ForgotPasswordForm() {
           <SubmitButton>{m.sendLink}</SubmitButton>
         </>
       )}
-      <Link href="/login" className="text-center text-sm text-accent-text hover:underline">
+      <Link href="/login" className="tap-area self-center text-sm text-accent-text hover:underline">
         {m.backToLogin}
       </Link>
     </form>

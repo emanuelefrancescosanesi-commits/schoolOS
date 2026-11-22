@@ -134,7 +134,7 @@ export function GradesView(props: Props) {
                   aria-pressed={periodId === p.id}
                   onClick={() => setPeriodId(p.id)}
                   className={cn(
-                    "h-8 pointer-coarse:h-10 rounded-[6px] px-3 text-sm transition-colors",
+                    "h-8 pointer-coarse:h-11 rounded-[6px] px-3 text-sm transition-colors",
                     periodId === p.id ? "bg-surface-2 font-medium text-fg" : "text-muted hover:text-fg",
                   )}
                 >

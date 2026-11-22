@@ -155,6 +155,18 @@
   }
 }
 
+/* Area di tocco ≥ 44 px su schermi touch senza cambiare il layout: link in linea, icone piccole. */
+@utility tap-area {
+  position: relative;
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -0.75rem -0.5rem;
+    }
+  }
+}
+
 /* Numeri in colonna: medie e voti usano cifre tabulari. */
 @utility tabular {
   font-family: var(--font-mono);

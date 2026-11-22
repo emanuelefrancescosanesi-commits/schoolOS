@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 import { getMessages } from "@/lib/i18n";
 import { PREFERENCES_SCRIPT } from "@/lib/preferences";
+import { PwaRegister } from "@/components/shell/pwa-register";
 import "./globals.css";
 
 const m = getMessages();
@@ -30,7 +31,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Applica tema e stato della sidebar prima del primo paint. */}
         <script dangerouslySetInnerHTML={{ __html: PREFERENCES_SCRIPT }} />
       </head>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        {children}
+        <PwaRegister />
+      </body>
     </html>
   );
 }

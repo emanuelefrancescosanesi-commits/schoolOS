@@ -59,9 +59,9 @@ export function MonthView({ tasks, subjects, today }: { tasks: Task[]; subjects:
       </div>
 
       <Card className="p-2">
-        <div role="grid" aria-label={capitalize(formatMonthYear(month))} className="grid grid-cols-7 gap-1">
+        <div role="group" aria-label={capitalize(formatMonthYear(month))} className="grid grid-cols-7 gap-1">
           {WEEKDAYS.map((d) => (
-            <div key={d} role="columnheader" className="py-1 text-center text-xs font-medium text-muted">
+            <div key={d} aria-hidden className="py-1 text-center text-xs font-medium text-muted">
               {capitalize(formatWeekdayShort(d))}
             </div>
           ))}
@@ -74,13 +74,12 @@ export function MonthView({ tasks, subjects, today }: { tasks: Task[]; subjects:
               <button
                 key={day}
                 type="button"
-                role="gridcell"
-                aria-selected={isSelected}
+                aria-pressed={isSelected}
                 aria-label={`${formatLongDay(day)}${items.length ? `, ${m.count(items.length)}` : ""}`}
                 onClick={() => setSelected(day)}
                 className={cn(
                   "relative flex h-12 flex-col items-center justify-center gap-1 rounded-control text-sm transition-colors",
-                  inMonth ? "text-fg" : "text-muted/50",
+                  inMonth ? "text-fg" : "text-muted",
                   isSelected ? "bg-accent text-accent-fg" : "hover:bg-surface-2",
                   day === today && !isSelected && "ring-1 ring-accent",
                   isoWeekday(day) >= 6 && !isSelected && "text-muted",

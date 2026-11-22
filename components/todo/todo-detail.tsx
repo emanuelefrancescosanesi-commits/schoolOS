@@ -254,7 +254,7 @@ function Body({ todo, onClose, store, today, projects, subjects, labels, subtask
                 aria-pressed={on}
                 onClick={() => toggleLabel(l.name)}
                 className={cn(
-                  "h-8 pointer-coarse:h-10 rounded-full border px-3 text-xs",
+                  "h-8 pointer-coarse:h-11 rounded-full border px-3 text-xs",
                   on ? "border-accent-text bg-accent-soft font-medium text-accent-text" : "border-border text-muted hover:bg-surface-2",
                 )}
               >

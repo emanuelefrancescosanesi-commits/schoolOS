@@ -81,7 +81,7 @@ export function TimetableBoard({ slots, subjects, today, nowTime, demo }: Props)
         const day = slotsOfDay(all, d);
         return (
           <section key={d} aria-labelledby={`d-${d}`} className="flex flex-col gap-2">
-            <h2 id={`d-${d}`} className={d === todayDay ? "text-sm font-medium text-accent" : "text-sm font-medium text-muted"}>
+            <h2 id={`d-${d}`} className={d === todayDay ? "text-sm font-medium text-accent-text" : "text-sm font-medium text-muted"}>
               {m.days[d]}
             </h2>
             {day.length === 0 ? (
