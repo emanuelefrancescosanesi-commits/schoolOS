@@ -253,7 +253,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "limite-analisi",
     category: "import",
     question: "C'è un limite alle analisi?",
-    answer: ["Sì: massimo 15 analisi al giorno. Le funzioni automatiche avanzate sono pensate per un piano a pagamento; leggere i voti a mano resta sempre gratuito."],
+    answer: ["Sì: la lettura automatica con intelligenza artificiale (testo non riconosciuto o screenshot) ha un massimo di 15 analisi al giorno. Le funzioni automatiche avanzate sono pensate per un piano a pagamento; leggere i voti a mano resta sempre gratuito."],
     keywords: ["limite", "15", "massimo", "giorno", "analisi", "quota", "pro", "abbonamento", "ai", "intelligenza artificiale"],
   },
 

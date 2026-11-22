@@ -75,6 +75,10 @@ function Chat() {
         setMessages([...next, { role: "assistant", content: result.reply }]);
         return;
       }
+      // La domanda non ha avuto risposta: la tolgo dalla conversazione (altrimenti due messaggi
+      // dello studente di fila sarebbero rifiutati dal server) e la rimetto nella casella.
+      setMessages(messages);
+      setDraft(content);
       setError(
         result.error ??
           (result.code === "limit"
