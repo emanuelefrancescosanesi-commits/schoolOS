@@ -27,6 +27,12 @@ const NOT_CONFIGURED: AuthFormState = {
   error: "L'accesso non è ancora attivo: Supabase non è configurato. Puoi esplorare l'app in modalità demo.",
 };
 
+/** Token anti-bot del modulo (vuoto se il CAPTCHA non è attivo): Supabase lo verifica da solo. */
+function captchaToken(formData: FormData): string | undefined {
+  const token = formData.get("captchaToken");
+  return typeof token === "string" && token.length > 0 && token.length <= 4096 ? token : undefined;
+}
+
 export async function signInWithPassword(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   if (!isSupabaseConfigured()) return NOT_CONFIGURED;
   const parsed = z.object({ email, password: z.string().min(1, "Scrivi la password") }).safeParse({
@@ -37,7 +43,7 @@ export async function signInWithPassword(_prev: AuthFormState, formData: FormDat
   if (!parsed.success) return { error: parsed.error.issues[0].message, fields };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { error } = await supabase.auth.signInWithPassword({ ...parsed.data, options: { captchaToken: captchaToken(formData) } });
   if (error) return { error: authErrorMessage(error), needsConfirmation: error.code === "email_not_confirmed", fields };
 
   redirect(safeNextPath(String(formData.get("next") ?? "")));
@@ -66,6 +72,7 @@ export async function signUp(_prev: AuthFormState, formData: FormData): Promise<
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
+      captchaToken: captchaToken(formData),
       data: { first_name: parsed.data.first_name },
       emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=/onboarding`,
     },
@@ -101,7 +108,7 @@ export async function resendConfirmation(_prev: AuthFormState, formData: FormDat
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: parsed.data,
-    options: { emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=/onboarding` },
+    options: { captchaToken: captchaToken(formData), emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=/onboarding` },
   });
   if (error) return { error: authErrorMessage(error) };
   return { notice: `Email rimandata a ${parsed.data}. Controlla anche la cartella spam.` };
@@ -115,9 +122,10 @@ export async function requestPasswordReset(_prev: AuthFormState, formData: FormD
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
     redirectTo: `${await siteOrigin()}/auth/confirm?next=/reset-password`,
+    captchaToken: captchaToken(formData),
   });
   // Stesso messaggio che l'account esista o no: non riveliamo quali email sono registrate.
-  if (error && error.code?.startsWith("over_")) return { error: authErrorMessage(error) };
+  if (error && (error.code?.startsWith("over_") || error.code === "captcha_failed")) return { error: authErrorMessage(error) };
   return { notice: "Se l'indirizzo è registrato, riceverai un'email con il link per scegliere una nuova password." };
 }
 

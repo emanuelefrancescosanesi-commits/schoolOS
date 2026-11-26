@@ -5,7 +5,7 @@ import type { Database } from "./database.types";
 import { getSupabaseEnv } from "./env";
 
 /** Pagine raggiungibili senza sessione. */
-const PUBLIC_PREFIXES = ["/login", "/signup", "/forgot-password", "/auth/", "/privacy"];
+const PUBLIC_PREFIXES = ["/login", "/signup", "/forgot-password", "/auth/", "/privacy", "/termini"];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((p) => pathname === p.replace(/\/$/, "") || pathname.startsWith(p));

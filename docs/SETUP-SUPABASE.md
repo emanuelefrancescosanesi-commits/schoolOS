@@ -86,3 +86,12 @@ TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres npm tes
 ```
 
 Senza `TEST_DATABASE_URL` questi test vengono saltati; in CI girano sempre.
+
+## CAPTCHA anti-bot (Cloudflare Turnstile, gratuito)
+
+Il codice è pronto e resta spento finché non imposti la chiave. **L'ordine conta**, altrimenti nessuno riesce a registrarsi:
+
+1. Cloudflare → **Turnstile** → **Add widget**: nome `SchoolOS`, dominio `school-os-brown.vercel.app` (e quello definitivo, quando c'è), modalità **Managed**. Ti dà una **Site key** (pubblica) e una **Secret key** (segreta).
+2. Vercel → Settings → Environment Variables: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` = la Site key. **Redeploy**. Controlla che su Accedi / Crea account compaia la casella.
+3. Solo ora, Supabase → Authentication → **Attack Protection** → **Enable CAPTCHA protection** → provider **Turnstile** → incolla la **Secret key** → Save.
+4. Prova a registrarti e ad accedere. Se qualcosa si blocca, spegni il CAPTCHA al punto 3: l'app torna a funzionare subito.
