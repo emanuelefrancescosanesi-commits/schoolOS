@@ -39,8 +39,28 @@ export function it(n: string): number {
 /**
  * Clic come lo farebbe una persona: porta l'elemento al centro dello schermo, lontano
  * dall'intestazione fissa e dalla barra in basso del telefono, poi tocca.
+ * Se il clic non riesce, l'errore contiene cosa copre il pulsante (utile in CI, dove non si vede lo schermo).
  */
 export async function tap(locator: Locator) {
   await locator.evaluate((el) => el.scrollIntoView({ block: "center" }));
-  await locator.click();
+  try {
+    await locator.click({ timeout: 8_000 });
+  } catch (error) {
+    const info = await locator
+      .evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const x = r.left + r.width / 2;
+        const y = r.top + r.height / 2;
+        const describe = (n: Element) => `${n.tagName.toLowerCase()}.${String(n.className).slice(0, 60)}`;
+        return JSON.stringify({
+          rect: [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)],
+          viewport: [window.innerWidth, window.innerHeight],
+          scrollY: Math.round(window.scrollY),
+          docHeight: document.documentElement.scrollHeight,
+          stack: document.elementsFromPoint(x, y).slice(0, 5).map(describe),
+        });
+      })
+      .catch(() => "n/d");
+    throw new Error(`tap fallito: ${info}\n${String(error).slice(0, 300)}`);
+  }
 }
