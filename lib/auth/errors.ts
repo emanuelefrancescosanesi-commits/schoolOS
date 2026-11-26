@@ -11,6 +11,7 @@ const MESSAGES: Record<string, string> = {
   same_password: "La nuova password deve essere diversa da quella attuale.",
   otp_expired: "Il link è scaduto o è già stato usato. Richiedine uno nuovo.",
   flow_state_expired: "La richiesta è scaduta. Riprova dall'inizio.",
+  captcha_failed: "Verifica anti-bot non riuscita. Aspetta che la casella si completi e riprova.",
   signup_disabled: "Le registrazioni sono temporaneamente chiuse.",
 };
 

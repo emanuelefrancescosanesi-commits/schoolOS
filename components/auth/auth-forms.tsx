@@ -17,6 +17,7 @@ import {
   signUp,
   updatePassword,
 } from "@/lib/auth/actions";
+import { Turnstile } from "@/components/auth/turnstile";
 import { getMessages } from "@/lib/i18n";
 
 function SubmitButton({ children }: { children: React.ReactNode }) {
@@ -76,7 +77,10 @@ function ResendConfirmation({ email }: { email: string }) {
       {state.notice ? (
         <FormMessage tone="notice">{state.notice}</FormMessage>
       ) : (
-        <ResendButton label={m.resendConfirmation} />
+        <>
+          <Turnstile resetKey={state} />
+          <ResendButton label={m.resendConfirmation} />
+        </>
       )}
     </form>
   );
@@ -120,6 +124,7 @@ export function LoginForm() {
         <Link href="/forgot-password" className="tap-area -mt-1 self-end text-xs text-accent-text hover:underline">
           {m.forgot}
         </Link>
+        <Turnstile resetKey={state} />
         <SubmitButton>{m.signIn}</SubmitButton>
       </form>
       {state.needsConfirmation && state.fields?.email && <ResendConfirmation key={state.fields.email} email={state.fields.email} />}
@@ -193,6 +198,7 @@ export function SignUpForm() {
             </Link>
           </span>
         </label>
+        <Turnstile resetKey={state} />
         <SubmitButton>{m.signUp}</SubmitButton>
       </form>
       <p className="text-center text-sm text-muted">
@@ -216,6 +222,7 @@ export function ForgotPasswordForm() {
           <Field label={m.email} htmlFor="email">
             <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
           </Field>
+          <Turnstile resetKey={state} />
           <SubmitButton>{m.sendLink}</SubmitButton>
         </>
       )}
