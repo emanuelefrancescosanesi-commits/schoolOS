@@ -1,5 +1,6 @@
 import "server-only";
 import { connection } from "next/server";
+import { cache } from "react";
 import { buildDemoDataset } from "@/lib/demo/dataset";
 import { type DateKey, dateKeyInTimeZone, hourInTimeZone } from "@/lib/domain/dates";
 import type { SchoolData } from "@/lib/domain/model";
@@ -33,7 +34,7 @@ function isMissingTable(error: { code?: string }): boolean {
   return error.code === "PGRST205" || error.code === "42P01";
 }
 
-export async function getSchoolContext(): Promise<SchoolContext> {
+export const getSchoolContext = cache(async function getSchoolContext(): Promise<SchoolContext> {
   // I dati dipendono dall'ora e dall'utente: sempre a richiesta, mai prerenderizzati.
   await connection();
   const now = new Date();
@@ -93,4 +94,4 @@ export async function getSchoolContext(): Promise<SchoolContext> {
     messages: messages.data ?? [],
   });
   return { data, today, hour: hourInTimeZone(now, profile.time_zone), schoolYear };
-}
+});

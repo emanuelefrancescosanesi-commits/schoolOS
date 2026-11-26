@@ -1,5 +1,6 @@
-import { BellIcon, FlaskConicalIcon } from "lucide-react";
+import { FlaskConicalIcon } from "lucide-react";
 import Link from "next/link";
+import { BellLink } from "@/components/notifications/bell-link";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getMessages } from "@/lib/i18n";
 import { Logo } from "./logo";
@@ -46,13 +47,7 @@ export function AppShell({
           </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Link
-              href="/notifications"
-              aria-label={m.nav.notifications}
-              className="inline-flex size-9 pointer-coarse:size-11 items-center justify-center rounded-control text-muted hover:bg-surface-2 hover:text-fg"
-            >
-              <BellIcon strokeWidth={1.5} className="size-[18px]" />
-            </Link>
+            <BellLink />
           </div>
         </header>
 
