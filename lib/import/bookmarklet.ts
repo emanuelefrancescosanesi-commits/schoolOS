@@ -37,7 +37,7 @@ try{${engine}
 ;var rules=${JSON.stringify(rules)};var K={written:"Scritto",oral:"Orale",practical:"Pratico"};
 for(var i=0;i<rules.length&&!t;i++){var r=window.schoolosRegistry.hostAllowed(location.hostname,rules[i])?window.schoolosRegistry.extractGrid(document,rules[i].datasets.grades,new Date()):null;
 if(r&&r.length){r.sort(function(a,b){return a.subject<b.subject?-1:a.subject>b.subject?1:0});var last=null,o=[];
-r.forEach(function(x){if(x.subject!==last){o.push("",x.subject);last=x.subject}var p=x.date.split("-");o.push(p[2]+"/"+p[1]+"/"+p[0]+" "+K[x.kind]+" "+String(x.value).replace(".",","))});t=o.join("\\n").trim()}}}catch(e){}
+r.forEach(function(x){if(x.subject!==last){o.push("",x.subject);last=x.subject}var p=x.date.split("-");o.push(p[2]+"/"+p[1]+"/"+p[0]+" "+K[x.kind]+" "+String(x.value).replace(".",",")+(x.weight!==undefined&&x.weight!==1?" peso "+String(x.weight).replace(".",","):""))});t=o.join("\\n").trim()}}}catch(e){}
 if(!t)t=(document.body&&document.body.innerText||"").replace(/[ \\t]+/g," ").replace(/\\n{3,}/g,"\\n\\n").trim();
 t=t.slice(0,${BOOKMARKLET_MAX_CHARS});
 if(!t){alert("SchoolOS: non trovo testo in questa pagina.");return}

@@ -20,6 +20,14 @@ ITALIANO
     ]);
   });
 
+  it("legge il peso («peso 0,5», «Peso: 50%») e lo toglie dalla descrizione", () => {
+    const text = "BIOLOGIA\n21/10/2026 Orale 8 peso 0,5\n22/10/2026 Scritto 7 Peso: 50%\n23/10/2026 Orale 9 peso 2\n24/10/2026 Orale 6 peso 99\n25/10/2026 Orale 6";
+    const out = parseRegistroText(text, { subjectNames: ["Biologia"] });
+    expect(out.map((g) => g.weight ?? null)).toEqual([0.5, 0.5, 2, null, null]);
+    expect(out[0].description).toBeNull();
+    expect(out[0].value).toBe("8");
+  });
+
   it("legge righe con la materia in ogni riga e campi in altro ordine", () => {
     const text = [
       "Matematica\tScritto\t14/10/2026\t7,5\tFunzioni",

@@ -61,6 +61,15 @@ function takeDate(line: string): { date: string | null; rest: string } {
   return { date: null, rest: line };
 }
 
+/** «peso 0,5», «Peso: 50%»: il peso della prova. Percentuale = frazione; numero ≤ 10 = peso diretto. */
+function takeWeight(text: string): { weight: number | null; rest: string } {
+  const m = /\bpeso\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*(%?)/i.exec(text);
+  if (!m) return { weight: null, rest: text };
+  const n = Number(m[1].replace(",", "."));
+  const w = m[2] ? n / 100 : n;
+  return { weight: w > 0 && w <= 10 ? Math.round(w * 100) / 100 : null, rest: text.replace(m[0], " ") };
+}
+
 function takeKind(text: string): { kind: GradeKind | null; rest: string } {
   for (const [re, kind] of KIND_WORDS) {
     const m = re.exec(text);
@@ -110,7 +119,8 @@ export function parseRegistroText(text: string, ctx: ParseContext): ExtractedGra
 
   for (const line of lines) {
     const { date, rest: withoutDate } = takeDate(line);
-    const { kind, rest: withoutKind } = takeKind(withoutDate);
+    const { weight, rest: withoutWeight } = takeWeight(withoutDate);
+    const { kind, rest: withoutKind } = takeKind(withoutWeight);
     const { value, rest: withoutGrade } = takeGrade(withoutKind);
 
     if (!date) {
@@ -144,7 +154,7 @@ export function parseRegistroText(text: string, ctx: ParseContext): ExtractedGra
       .trim();
 
     const resolved = date.includes("-") ? date : ctx.contextYear ? withYear(date, ctx.contextYear) : date;
-    out.push({ subject, value: gradeText, date: resolved, kind, description: description || null });
+    out.push({ subject, value: gradeText, date: resolved, kind, description: description || null, ...(weight !== null ? { weight } : {}) });
   }
   return out;
 }
