@@ -11,14 +11,24 @@ export async function open(page: Page, path: string, opts: { banner?: boolean } 
   await expect(page.getByText("Modalità demo", { exact: false }).first()).toBeVisible();
 }
 
-/** Nessuna pagina deve scorrere in orizzontale: è il bug più comune su telefono. */
+/**
+ * Nessuna pagina deve essere più larga dello schermo: è il bug più comune su telefono.
+ * Su un telefono vero (e nell'emulazione mobile) il browser non scorre di lato: rimpicciolisce
+ * la pagina finché ci sta, quindi `innerWidth` supera la larghezza reale. Si controllano
+ * entrambe le cose e, se fallisce, il messaggio dice quali elementi sbordano.
+ */
 export async function expectNoHorizontalScroll(page: Page) {
+  const width = page.viewportSize()?.width ?? 0;
+  const measure = () =>
+    page.evaluate((w) => {
+      const wide = [...document.querySelectorAll("body *")]
+        .filter((e) => e.getBoundingClientRect().right > w + 1 && !e.closest("[data-scroll-x], nav"))
+        .slice(0, 5)
+        .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 50)} →${Math.round(e.getBoundingClientRect().right)}`);
+      return { over: Math.max(innerWidth, document.documentElement.scrollWidth) - w, wide };
+    }, width);
   // Con retry: durante le animazioni di transizione la larghezza può oscillare per qualche istante.
-  await expect
-    .poll(() => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), {
-      message: "scroll orizzontale della pagina",
-    })
-    .toBeLessThanOrEqual(1);
+  await expect.poll(async () => (await measure()).over, { message: `pagina più larga di ${width}px: ${JSON.stringify((await measure()).wide)}` }).toBeLessThanOrEqual(1);
 }
 
 /** Raccoglie gli errori JS e le risposte 5xx: ogni spec li controlla alla fine. */
