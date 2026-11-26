@@ -242,7 +242,7 @@ export function MonthView({ tasks, events, subjects, today, demo }: Props) {
                   <div className="min-w-0 flex-1 text-left">
                     <p className="truncate text-sm font-medium">{item.title}</p>
                     <p className="truncate text-xs text-muted">
-                      {[item.time ?? (item.event ? m.allDay : m.fromTask), s?.name].filter(Boolean).join(" · ")}
+                      {[item.time ?? (item.event ? m.allDay : m.fromTask), s?.name, item.event?.imported ? m.imported : undefined].filter(Boolean).join(" · ")}
                     </p>
                   </div>
                   <Badge tone={KIND_TONE[item.kind]}>{m.kinds[item.kind]}</Badge>
@@ -251,7 +251,7 @@ export function MonthView({ tasks, events, subjects, today, demo }: Props) {
               return (
                 <li key={item.id}>
                   <Card className="flex-row items-center gap-1 p-1.5 pr-1.5">
-                    {item.event ? (
+                    {item.event && !item.event.imported ? (
                       <button
                         type="button"
                         onClick={() => openEdit(item.event!)}
@@ -260,12 +260,16 @@ export function MonthView({ tasks, events, subjects, today, demo }: Props) {
                       >
                         {body}
                       </button>
+                    ) : item.event ? (
+                      <div className="flex min-h-11 min-w-0 flex-1 items-center gap-3 px-2" title={m.importedHint}>
+                        {body}
+                      </div>
                     ) : (
                       <Link href="/tasks" className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-control px-2 hover:bg-surface-2">
                         {body}
                       </Link>
                     )}
-                    {item.event && (
+                    {item.event && !item.event.imported && (
                       <Button variant="ghost" size="icon" aria-label={m.remove(item.title)} onClick={() => remove(item.event!)} disabled={pending}>
                         <Trash2Icon strokeWidth={1.5} aria-hidden />
                       </Button>
