@@ -3,11 +3,11 @@ import { eventFromRow, messageFromRow } from "./mappers";
 
 describe("eventFromRow", () => {
   it("converte l'ora in HH:MM e i null in undefined", () => {
-    const e = eventFromRow({ id: "1", user_id: "u", subject_id: null, title: "T", kind: "test", starts_on: "2026-12-01", starts_at: "08:30:00", notes: null, created_at: "", updated_at: "" });
+    const e = eventFromRow({ id: "1", user_id: "u", subject_id: null, title: "T", kind: "test", starts_on: "2026-12-01", starts_at: "08:30:00", notes: null, feed_id: null, external_id: null, created_at: "", updated_at: "" });
     expect(e).toEqual({ id: "1", title: "T", date: "2026-12-01", time: "08:30", kind: "test", subjectId: undefined, notes: undefined });
   });
   it("evento senza ora = tutto il giorno", () => {
-    const e = eventFromRow({ id: "1", user_id: "u", subject_id: "s", title: "T", kind: "event", starts_on: "2026-12-01", starts_at: null, notes: "n", created_at: "", updated_at: "" });
+    const e = eventFromRow({ id: "1", user_id: "u", subject_id: "s", title: "T", kind: "event", starts_on: "2026-12-01", starts_at: null, notes: "n", feed_id: null, external_id: null, created_at: "", updated_at: "" });
     expect(e.time).toBeUndefined();
     expect(e).toMatchObject({ subjectId: "s", notes: "n" });
   });
@@ -28,5 +28,12 @@ describe("messageFromRow", () => {
   });
   it("una comunicazione letta non è «unread»", () => {
     expect(messageFromRow({ ...row, is_read: true }, "UTC").unread).toBe(false);
+  });
+});
+
+describe("eventFromRow: eventi importati", () => {
+  it("un evento con feed_id è importato (sola lettura)", () => {
+    const e = eventFromRow({ id: "1", user_id: "u", subject_id: null, title: "T", kind: "event", starts_on: "2026-12-01", starts_at: null, notes: null, feed_id: "f", external_id: "x", created_at: "", updated_at: "" });
+    expect(e.imported).toBe(true);
   });
 });

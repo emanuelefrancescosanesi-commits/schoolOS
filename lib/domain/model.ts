@@ -69,6 +69,8 @@ export interface CalendarEvent {
   kind: EventKind;
   subjectId?: string;
   notes?: string;
+  /** Vero se arriva da un calendario collegato (iCal): sola lettura, si aggiorna da solo. */
+  imported?: boolean;
 }
 
 export interface SchoolData {

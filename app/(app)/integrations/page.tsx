@@ -1,11 +1,13 @@
-import { MonitorIcon, GraduationCapIcon, MailIcon } from "lucide-react";
+import { CalendarDaysIcon, MonitorIcon, GraduationCapIcon, MailIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { CalendarFeeds } from "@/components/integrations/calendar-feeds";
 import { ExtensionLink } from "@/components/grades/extension-link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCalendarFeeds } from "@/lib/data/feeds";
 import { getSchoolContext } from "@/lib/data/school-data";
 import { getMessages } from "@/lib/i18n";
 
@@ -21,6 +23,7 @@ export default function IntegrationsPage() {
 
 async function Integrations() {
   const { data } = await getSchoolContext();
+  const feeds = await getCalendarFeeds();
   const m = getMessages();
   const t = m.integrationsPage;
   const registro = data.profile.registro;
@@ -61,6 +64,17 @@ async function Integrations() {
         <CardContent className="flex flex-col gap-3 text-sm">
           <p className="text-muted">{t.extension.body}</p>
           {data.isDemo ? <p className="text-muted">{t.extension.demo}</p> : <ExtensionLink />}
+        </CardContent>
+      </Card>
+
+      <Card aria-labelledby="int-cal">
+        <CardHeader>
+          <CalendarDaysIcon strokeWidth={1.5} className="size-4 text-muted" aria-hidden />
+          <CardTitle id="int-cal">{t.calendar.title}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 text-sm">
+          <p className="text-muted">{t.calendar.body}</p>
+          {data.isDemo ? <p className="text-muted">{t.calendar.demo}</p> : <CalendarFeeds feeds={feeds} />}
         </CardContent>
       </Card>
 
