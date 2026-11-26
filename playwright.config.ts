@@ -42,6 +42,8 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
       NEXT_TELEMETRY_DISABLED: "1",
+      // WebKit forza https su localhost con "upgrade-insecure-requests" (CSP di produzione).
+      E2E_HTTP: "1",
     },
   },
 });

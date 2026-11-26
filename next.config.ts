@@ -23,7 +23,9 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  ...(isDev ? [] : ["upgrade-insecure-requests"]),
+  // Solo i test e2e in CI (E2E_HTTP=1) lo tolgono: WebKit non esenta localhost
+  // dall'upgrade a https e non carica nulla da http://localhost.
+  ...(isDev || process.env.E2E_HTTP === "1" ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const securityHeaders = [
