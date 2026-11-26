@@ -12,7 +12,9 @@
     "test:watch": "vitest",
     "predev": "node scripts/copy-ocr-assets.mjs",
     "prebuild": "node scripts/copy-ocr-assets.mjs",
-    "cap:sync": "cap sync"
+    "cap:sync": "cap sync",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
