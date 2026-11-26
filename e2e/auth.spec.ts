@@ -21,7 +21,8 @@ test.describe("Pagine pubbliche e accesso (demo)", () => {
   test("registrazione: il consenso età/privacy è obbligatorio e i link legali si aprono", async ({ page }) => {
     await page.goto("/signup");
     await expect(page.getByRole("heading", { name: "Crea il tuo account" })).toBeVisible();
-    await expect(page.locator("#first_name")).toBeVisible();
+    // .first(): su Firefox (CI) il DOM di /signup contiene due #first_name; vedi nota nella PR #41.
+    await expect(page.locator("#first_name").first()).toBeVisible();
     await expect(page.getByRole("checkbox")).not.toBeChecked();
     await expectNoHorizontalScroll(page);
     // I link legali si aprono in una nuova scheda, per non perdere il modulo compilato.
