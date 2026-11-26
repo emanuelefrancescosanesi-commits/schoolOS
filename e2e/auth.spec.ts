@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectNoHorizontalScroll } from "./helpers";
+import { expectNoHorizontalScroll, open } from "./helpers";
 
 /**
  * In modalità demo non c'è Supabase: qui si controlla l'interfaccia delle pagine pubbliche.
@@ -7,7 +7,7 @@ import { expectNoHorizontalScroll } from "./helpers";
  */
 test.describe("Pagine pubbliche e accesso (demo)", () => {
   test("login: mostra il modulo, il Google e l'ingresso alla demo", async ({ page }) => {
-    await page.goto("/login");
+    await open(page, "/login");
     await expect(page.getByRole("heading", { name: "Accedi a SchoolOS" })).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password")).toBeVisible();
@@ -19,7 +19,7 @@ test.describe("Pagine pubbliche e accesso (demo)", () => {
   });
 
   test("registrazione: il consenso età/privacy è obbligatorio e i link legali si aprono", async ({ page }) => {
-    await page.goto("/signup");
+    await open(page, "/signup");
     await expect(page.getByRole("heading", { name: "Crea il tuo account" })).toBeVisible();
     // .first(): su Firefox (CI) il DOM di /signup contiene due #first_name; vedi nota nella PR #41.
     await expect(page.locator("#first_name").first()).toBeVisible();
@@ -33,17 +33,17 @@ test.describe("Pagine pubbliche e accesso (demo)", () => {
   });
 
   test("password dimenticata: modulo con email", async ({ page }) => {
-    await page.goto("/forgot-password");
+    await open(page, "/forgot-password");
     await expect(page.getByRole("heading", { name: "Recupera la password" })).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByRole("link", { name: "Torna all'accesso" })).toBeVisible();
   });
 
   test("informativa privacy e termini di servizio sono raggiungibili", async ({ page }) => {
-    await page.goto("/privacy");
+    await open(page, "/privacy", { banner: false });
     await expect(page.getByRole("heading", { name: "Informativa sulla privacy" })).toBeVisible();
     await expectNoHorizontalScroll(page);
-    await page.goto("/termini");
+    await open(page, "/termini", { banner: false });
     await expect(page.getByRole("heading", { name: "Termini di servizio" })).toBeVisible();
     await expectNoHorizontalScroll(page);
   });

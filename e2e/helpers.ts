@@ -1,9 +1,13 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
 /** Apre una pagina dell'app e aspetta che l'interfaccia sia davvero interattiva. */
-export async function open(page: Page, path: string) {
+export async function open(page: Page, path: string, opts: { banner?: boolean } = {}) {
   await page.goto(path);
-  // Il layout dell'app mostra sempre il banner demo: se c'è, la pagina è idratata.
+  // Aspetta l'idratazione di React: un clic prima di quel momento (WebKit su CI è più lento)
+  // farebbe inviare il modulo al server invece di passare al passo successivo.
+  await page.waitForLoadState("networkidle");
+  // Il layout dell'app mostra sempre il banner demo (le pagine legali no).
+  if (opts.banner === false) return;
   await expect(page.getByText("Modalità demo", { exact: false }).first()).toBeVisible();
 }
 

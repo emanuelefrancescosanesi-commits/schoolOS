@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { expectNoHorizontalScroll, trackErrors } from "./helpers";
+import { expectNoHorizontalScroll, open, trackErrors } from "./helpers";
 
 test.describe("Onboarding (demo)", () => {
   test("percorre tutti i passi fino al riepilogo e finisce senza salvare", async ({ page }) => {
     const errors = trackErrors(page);
-    await page.goto("/onboarding");
+    await open(page, "/onboarding");
     await expect(page.getByText("Modalità demo: puoi provare tutti i passi")).toBeVisible();
 
     // 1. Nome: obbligatorio.
@@ -50,7 +50,7 @@ test.describe("Onboarding (demo)", () => {
   });
 
   test("il tasto Indietro riporta al passo precedente", async ({ page }) => {
-    await page.goto("/onboarding");
+    await open(page, "/onboarding");
     await page.getByRole("textbox", { name: "Nome", exact: true }).fill("Luca");
     await page.getByRole("button", { name: "Avanti" }).click();
     await page.getByRole("button", { name: "Indietro" }).click();
