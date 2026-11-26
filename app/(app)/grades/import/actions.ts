@@ -89,6 +89,7 @@ const confirmedRowSchema = z.object({
   date: z.string().max(10),
   kind: z.enum(["written", "oral", "practical"]),
   description: z.string().max(200),
+  weight: z.number().gt(0).max(10).optional(),
 });
 
 export type ConfirmResult = { ok: true; imported: number; skipped: number } | { ok: false; error: string };
@@ -115,7 +116,7 @@ export async function confirmImport(rows: unknown): Promise<ConfirmResult> {
     const parsed = schema.safeParse({
       subject_id: row.subject_id,
       value: row.value,
-      weight: 1,
+      weight: row.weight ?? 1,
       kind: row.kind,
       graded_on: row.date,
       description: row.description,

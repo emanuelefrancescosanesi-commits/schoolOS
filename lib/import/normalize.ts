@@ -18,6 +18,8 @@ export interface ExtractedGrade {
   date: string | null;
   kind: GradeKind | null;
   description: string | null;
+  /** Peso del voto se il registro lo indica (0–10); assente = 1. */
+  weight?: number | null;
 }
 
 export interface ImportSubject {
@@ -44,6 +46,8 @@ export interface ImportRow {
   date: DateKey | null;
   kind: GradeKind;
   description: string;
+  /** Peso 0–10; 1 se il registro non lo indica. */
+  weight: number;
   status: RowStatus;
   /** Motivo per cui la riga non è importabile o richiede attenzione. */
   issue: string | null;
@@ -303,6 +307,7 @@ export function normalizeExtraction(extracted: ExtractedGrade[], ctx: NormalizeC
       date,
       kind,
       description: (item.description ?? "").trim().slice(0, 200),
+      weight: typeof item.weight === "number" && item.weight > 0 && item.weight <= 10 ? Math.round(item.weight * 100) / 100 : 1,
       status,
       issue: issues[0] ?? null,
     };

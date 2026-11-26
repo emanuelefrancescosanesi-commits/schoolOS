@@ -13,6 +13,7 @@ const row = (over: Partial<Draft> = {}): Draft => ({
   date: "2026-10-14",
   kind: "written",
   description: "",
+  weight: 1,
   status: "ready",
   issue: null,
   selected: true,

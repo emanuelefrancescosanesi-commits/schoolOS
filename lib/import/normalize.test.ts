@@ -160,3 +160,13 @@ describe("normalizeExtraction", () => {
     expect(row.subjectGuess).toBe("Chimica");
   });
 });
+
+describe("peso nelle righe di import", () => {
+  it("porta il peso indicato dal registro e usa 1 se manca o non è valido", () => {
+    const rows = normalizeExtraction(
+      [grade({ weight: 0.5 }), grade({ date: "2026-11-11" }), grade({ date: "2026-11-12", weight: 99 }), grade({ date: "2026-11-13", weight: 0 })],
+      ctx,
+    );
+    expect(rows.map((r) => r.weight)).toEqual([0.5, 1, 1, 1]);
+  });
+});

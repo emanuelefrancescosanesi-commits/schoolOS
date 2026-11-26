@@ -147,6 +147,7 @@ export function ImportCard({ today, scale, subjects }: Props) {
           date: r.date,
           kind: r.kind,
           description: r.description,
+          weight: r.weight,
         })),
       );
       if (!result.ok) {
