@@ -3,6 +3,10 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { syncFeed } from "@/lib/calendar/sync";
+import { googleConfig } from "@/lib/google/config";
+import { decryptToken } from "@/lib/google/crypto";
+import { revokeToken } from "@/lib/google/oauth";
+import { syncGoogle } from "@/lib/google/sync";
 import { normalizeFeedUrl } from "@/lib/calendar/feed-url";
 import { requireOnboardedUser } from "@/lib/data/session";
 import { dateKeyInTimeZone } from "@/lib/domain/dates";
@@ -68,20 +72,67 @@ export async function removeCalendarFeed(id: string): Promise<FeedActionResult> 
   return { ok: true };
 }
 
-/** Aggiorna i calendari non sincronizzati da più di 30 minuti (chiamata all'apertura del Calendario). */
+export async function syncGoogleNow(): Promise<FeedActionResult> {
+  if (!isSupabaseConfigured()) return DEMO;
+  const { user, profile } = await requireOnboardedUser();
+  const supabase = await createClient();
+  const res = await syncGoogle(supabase, user.id, profile.time_zone, dateKeyInTimeZone(new Date(), profile.time_zone));
+  refresh();
+  if (!res.ok) return { ok: false, error: res.error };
+  const { events, messagesAdded } = res.result;
+  const parts = [
+    events ? `Calendario: ${events.added} nuovi, ${events.updated} modificati, ${events.removed} rimossi.` : null,
+    messagesAdded !== null ? `Mail: ${messagesAdded} nuove.` : null,
+  ].filter(Boolean);
+  return { ok: true, summary: parts.join(" ") || "Già aggiornato." };
+}
+
+/** Scollega Google: revoca il permesso presso Google, elimina il collegamento e tutto ciò che ne è arrivato. */
+export async function disconnectGoogle(): Promise<FeedActionResult> {
+  if (!isSupabaseConfigured()) return DEMO;
+  const { user } = await requireOnboardedUser();
+  const supabase = await createClient();
+  const cfg = googleConfig();
+  const { data: conn } = await supabase.from("google_connections").select("refresh_token_enc").maybeSingle();
+  if (conn && cfg) {
+    try {
+      await revokeToken(decryptToken(conn.refresh_token_enc, cfg.tokenKey));
+    } catch {
+      // Chiave cambiata o dato illeggibile: si elimina comunque il collegamento locale.
+    }
+  }
+  const del = await Promise.all([
+    supabase.from("events").delete().not("google_event_id", "is", null),
+    supabase.from("inbox_messages").delete().not("external_id", "is", null),
+  ]);
+  if (del.some((r) => r.error)) return { ok: false, error: "Non siamo riusciti a scollegare. Riprova." };
+  const { error } = await supabase.from("google_connections").delete().eq("user_id", user.id);
+  if (error) return { ok: false, error: "Non siamo riusciti a scollegare. Riprova." };
+  refresh();
+  return { ok: true };
+}
+
+/** Aggiorna i calendari e Google se non sincronizzati da più di 30 minuti (all'apertura di Calendario e Inbox). */
 export async function syncStaleFeeds(): Promise<{ changed: boolean }> {
   if (!isSupabaseConfigured()) return { changed: false };
-  const { profile } = await requireOnboardedUser();
+  const { user, profile } = await requireOnboardedUser();
   const supabase = await createClient();
   const { data: feeds, error } = await supabase.from("calendar_feeds").select("id, url, last_synced_at, last_error");
-  if (error || !feeds) return { changed: false };
+  const feedList = error ? [] : (feeds ?? []);
   const today = dateKeyInTimeZone(new Date(), profile.time_zone);
   let changed = false;
-  for (const f of feeds) {
+  for (const f of feedList) {
     const last = f.last_synced_at ? Date.parse(f.last_synced_at) : 0;
     if (Date.now() - last < STALE_MS) continue;
     const res = await syncFeed(supabase, f, profile.time_zone, today);
     if (res.ok && res.result.added + res.result.updated + res.result.removed > 0) changed = true;
+  }
+  // Google (Calendar + Gmail), con lo stesso intervallo.
+  const { data: g } = await supabase.from("google_connections").select("last_synced_at, last_error").maybeSingle();
+  // Con un errore (es. collegamento scaduto) non si riprova a ogni apertura: si usa «Aggiorna ora» o si ricollega.
+  if (g && !g.last_error && Date.now() - (g.last_synced_at ? Date.parse(g.last_synced_at) : 0) >= STALE_MS) {
+    const res = await syncGoogle(supabase, user.id, profile.time_zone, today);
+    if (res.ok && ((res.result.events && res.result.events.added + res.result.events.updated + res.result.events.removed > 0) || res.result.messagesAdded)) changed = true;
   }
   if (changed) refresh();
   return { changed };

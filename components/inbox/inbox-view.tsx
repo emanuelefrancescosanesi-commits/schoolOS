@@ -210,9 +210,11 @@ export function InboxView({ messages, subjects, today, demo }: Props) {
                           <Button variant="secondary" size="sm" onClick={() => setRead(msg.id, !msg.unread)}>
                             {msg.unread ? t.markRead : t.markUnread}
                           </Button>
-                          <Button variant="ghost" size="sm" aria-label={t.remove(msg.subject)} onClick={() => remove(msg)} disabled={pending}>
-                            <Trash2Icon strokeWidth={1.5} aria-hidden /> {t.delete}
-                          </Button>
+                          {(demo || msg.source !== "email") && (
+                            <Button variant="ghost" size="sm" aria-label={t.remove(msg.subject)} onClick={() => remove(msg)} disabled={pending}>
+                              <Trash2Icon strokeWidth={1.5} aria-hidden /> {t.delete}
+                            </Button>
+                          )}
                           <Badge className="ml-auto self-center">{src[msg.source]}</Badge>
                         </div>
                       </div>
