@@ -173,8 +173,19 @@ export type EventRow = {
   notes: string | null;
   feed_id: string | null;
   external_id: string | null;
+  google_event_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type GoogleConnectionRow = {
+  user_id: string;
+  google_email: string;
+  refresh_token_enc: string;
+  scopes: string;
+  connected_at: string;
+  last_synced_at: string | null;
+  last_error: string | null;
 };
 
 export type CalendarFeedRow = {
@@ -197,6 +208,7 @@ export type InboxMessageRow = {
   body: string;
   received_at: string;
   is_read: boolean;
+  external_id: string | null;
   created_at: string;
 };
 
@@ -238,6 +250,10 @@ export type Database = {
         Insertable<Omit<TimetableSlotRow, Exclude<Generated, "id">>, "weekday" | "starts_at" | "ends_at">
       >;
       events: Table<EventRow, Insertable<Omit<EventRow, Generated>, "title" | "starts_on">>;
+      google_connections: Table<
+        GoogleConnectionRow,
+        Insertable<Omit<GoogleConnectionRow, "connected_at">, "google_email" | "refresh_token_enc">
+      >;
       calendar_feeds: Table<CalendarFeedRow, Insertable<Omit<CalendarFeedRow, Exclude<Generated, "id">>, "url">>;
       inbox_messages: Table<InboxMessageRow, Insertable<Omit<InboxMessageRow, Exclude<Generated, "id">>, "title">>;
       // Solo lettura e revoca dal client: i codici si creano con create_extension_token().
