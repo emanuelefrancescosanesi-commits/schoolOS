@@ -11,6 +11,11 @@ const MESSAGES: Record<string, string> = {
   same_password: "La nuova password deve essere diversa da quella attuale.",
   otp_expired: "Il link è scaduto o è già stato usato. Richiedine uno nuovo.",
   flow_state_expired: "La richiesta è scaduta. Riprova dall'inizio.",
+  session_not_found: "La sessione è scaduta. Accedi di nuovo oppure richiedi un nuovo link.",
+  session_expired: "La sessione è scaduta. Accedi di nuovo.",
+  reauthentication_needed: "Per sicurezza, esci e rientra nell'account, poi riprova.",
+  reauthentication_not_valid: "Il codice di verifica non è valido. Riprova.",
+  email_change_confirm_limit: "Hai già richiesto un cambio email da poco. Riprova tra qualche minuto.",
   signup_disabled: "Le registrazioni sono temporaneamente chiuse.",
 };
 

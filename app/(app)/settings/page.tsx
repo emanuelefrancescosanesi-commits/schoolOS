@@ -2,6 +2,7 @@ import { DownloadIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ExtensionLink } from "@/components/grades/extension-link";
+import { EmailForm, PasswordForm, SignOutEverywhere } from "@/components/settings/account-security";
 import { DeleteAccount } from "@/components/settings/delete-account";
 import { NotificationsForm } from "@/components/settings/notifications-form";
 import { PeriodsForm } from "@/components/settings/periods-form";
@@ -17,6 +18,7 @@ import type { DateKey } from "@/lib/domain/dates";
 import { yearForScheme, schoolYearStart } from "@/lib/validation/onboarding-defaults";
 import { getMessages } from "@/lib/i18n";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: getMessages().nav.settings };
 
@@ -32,6 +34,10 @@ async function Settings() {
   const m = getMessages().settings;
   const demo = !isSupabaseConfigured();
   const user = demo ? null : await getCurrentUser();
+  // Chi è entrato solo con Google non ha una password da verificare.
+  const hasPassword = demo
+    ? true
+    : ((await (await createClient()).auth.getUser()).data.user?.identities ?? []).some((i) => i.provider === "email");
   const { data, today, schoolYear } = await getSchoolContext();
   const { profile, periods } = data;
   const scheme = profile.periodScheme;
@@ -57,6 +63,18 @@ async function Settings() {
         </CardHeader>
         <CardContent className="text-sm text-muted">{user?.email ?? m.demoAccount}</CardContent>
       </Card>
+
+      <Section title={m.security.passwordTitle} body={m.security.passwordBody}>
+        <PasswordForm demo={demo} hasPassword={hasPassword} />
+      </Section>
+
+      <Section title={m.security.emailTitle} body={m.security.emailBody}>
+        <EmailForm demo={demo} hasPassword={hasPassword} currentEmail={user?.email ?? null} />
+      </Section>
+
+      <Section title={m.security.signOutAllTitle} body={m.security.signOutAllBody}>
+        <SignOutEverywhere demo={demo} />
+      </Section>
 
       <Section title={m.profileTitle} body={m.profileBody}>
         <ProfileForm
