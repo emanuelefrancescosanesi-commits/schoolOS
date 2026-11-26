@@ -1,0 +1,48 @@
+name: E2E
+
+# Test end-to-end con Playwright in modalità demo (nessun backend). Job separato da CI:
+# se è lento o instabile non blocca il merge. Si lancia anche a mano da Actions → E2E → Run workflow.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: e2e (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Chromium (telefono, tablet, desktop) è il riferimento; Firefox e WebKit sono segnalazioni.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: chromium, project: "chromium-*", browser: chromium, experimental: false }
+          - { name: firefox, project: "firefox-*", browser: firefox, experimental: true }
+          - { name: webkit, project: "webkit-*", browser: webkit, experimental: true }
+    env:
+      CI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npx playwright test --project="${{ matrix.project }}"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.name }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

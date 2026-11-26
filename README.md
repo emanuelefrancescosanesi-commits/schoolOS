@@ -19,6 +19,7 @@ Senza Supabase configurato l'app parte in **modalità demo**. Per attivare i dat
 npm install
 npm run dev        # http://localhost:3000
 npm test           # test (Vitest); con TEST_DATABASE_URL anche schema e RLS su Postgres
+npm run test:e2e   # test end-to-end Playwright in modalità demo (docs/TEST-E2E.md)
 npm run typecheck
 npm run lint
 npm run build

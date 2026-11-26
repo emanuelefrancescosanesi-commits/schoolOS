@@ -44,3 +44,8 @@ next-env.d.ts
 
 # asset OCR copiati da node_modules (scripts/copy-ocr-assets.mjs)
 /public/ocr
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
