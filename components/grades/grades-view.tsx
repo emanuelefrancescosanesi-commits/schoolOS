@@ -198,7 +198,7 @@ export function GradesView(props: Props) {
               const standing = avg === null ? "positive" : gradeStanding(avg, scale);
               const needed = standing !== "positive" ? requiredGrade(list, scale.passThreshold, scale, averageMethod) : null;
               return (
-                <Card key={subject.id} aria-labelledby={`subject-${subject.id}`}>
+                <Card key={subject.id} aria-labelledby={`subject-${subject.id}`} className="min-w-0">
                   <CardHeader>
                     <SubjectDot color={subject.color} />
                     <CardTitle id={`subject-${subject.id}`}>{subject.name}</CardTitle>
