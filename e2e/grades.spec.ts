@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoHorizontalScroll, it, open, trackErrors } from "./helpers";
+import { expectNoHorizontalScroll, it, open, tap, trackErrors } from "./helpers";
 
 /** Legge la media generale dalla statistica in alto. */
 async function average(page: Page): Promise<number> {
@@ -29,7 +29,7 @@ test.describe("Voti e media (demo)", () => {
     await value.fill("7½");
     await expect(page.getByText("Vale 7,5")).toBeVisible();
     await value.fill("10");
-    await page.getByRole("button", { name: "Aggiungi", exact: true }).click();
+    await tap(page.getByRole("button", { name: "Aggiungi", exact: true }));
 
     await expect(page.getByText("Aggiunto 10 in Matematica")).toBeVisible();
     await expect(page.getByLabel("Voto", { exact: true })).toHaveValue("");
@@ -42,14 +42,14 @@ test.describe("Voti e media (demo)", () => {
   test("un voto non valido mostra un errore e non cambia nulla", async ({ page }) => {
     const n = await count(page);
     await page.getByLabel("Voto", { exact: true }).fill("abc");
-    await page.getByRole("button", { name: "Aggiungi", exact: true }).click();
+    await tap(page.getByRole("button", { name: "Aggiungi", exact: true }));
     await expect(page.getByRole("alert").or(page.locator("[role=status], p").filter({ hasText: /voto|valore|non/i })).first()).toBeVisible();
     expect(await count(page)).toBe(n);
   });
 
   test("modificare un voto cambia la media subito", async ({ page }) => {
     const before = await average(page);
-    await page.getByRole("button", { name: /^Modifica voto: / }).first().click();
+    await tap(page.getByRole("button", { name: /^Modifica voto: / }).first());
     await expect(page.getByRole("heading", { name: "Modifica voto" })).toBeVisible();
     await page.getByLabel("Voto", { exact: true }).last().fill("10");
     await page.getByRole("button", { name: "Salva modifiche" }).click();
@@ -59,7 +59,7 @@ test.describe("Voti e media (demo)", () => {
 
   test("eliminare un voto lo toglie dal conteggio e Annulla lo ripristina", async ({ page }) => {
     const n = await count(page);
-    await page.getByRole("button", { name: /^Elimina voto: / }).first().click();
+    await tap(page.getByRole("button", { name: /^Elimina voto: / }).first());
     await expect(page.getByText("Voto eliminato")).toBeVisible();
     await expect.poll(async () => await count(page)).toBe(n - 1);
     await page.getByRole("button", { name: "Annulla" }).click();

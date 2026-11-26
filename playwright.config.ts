@@ -19,6 +19,8 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     locale: "it-IT",
     timezoneId: "Europe/Rome",
+    // L'app rispetta prefers-reduced-motion: senza animazioni i click non cadono su elementi in movimento.
+    contextOptions: { reducedMotion: "reduce" },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
