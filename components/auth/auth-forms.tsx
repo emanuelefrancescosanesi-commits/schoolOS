@@ -195,6 +195,10 @@ export function SignUpForm() {
             {m.consent}{" "}
             <Link href="/privacy" target="_blank" className="tap-area text-accent-text underline">
               {m.consentRead}
+            </Link>{" "}
+            ·{" "}
+            <Link href="/termini" target="_blank" className="text-accent-text underline">
+              {m.consentTerms}
             </Link>
           </span>
         </label>

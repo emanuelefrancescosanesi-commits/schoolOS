@@ -29,6 +29,26 @@ Indirizzi usati qui (cambiali se cambiano):
 4. **Dati di contatto:** la tua email. Accetta le norme → **Crea**.
 5. **Accesso ai dati** (Scopes): aggiungi solo `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`. Non aggiungere altro: con questi tre **non serve la verifica di Google**.
 6. **Pubblico → Pubblica app** (da «Test» a «In produzione»). Se resta in «Test», possono entrare solo gli utenti di prova che aggiungi a mano.
+7. **Branding** (o *Informazioni sull'app*): compila questi campi con gli indirizzi **del sito**, già online (le pagine ci sono):
+
+   | Campo di Google | Cosa inserire |
+   |---|---|
+   | Nome app | `SchoolOS` |
+   | Email di assistenza utenti | la tua email |
+   | Pagina iniziale dell'app | `https://school-os-brown.vercel.app` |
+   | Link alle norme sulla privacy | `https://school-os-brown.vercel.app/privacy` |
+   | Link ai termini di servizio | `https://school-os-brown.vercel.app/termini` |
+   | Email di contatto sviluppatore | la tua email |
+
+   **Domini autorizzati:** Google chiede il dominio della pagina iniziale. `vercel.app` non è accettato come dominio tuo
+   (è condiviso con tutti): con un dominio proprio (es. `schoolos.it`) inserisci quello e cambi i tre indirizzi qui sopra.
+   Per pubblicare **senza verifica** con i soli scope email e profilo il dominio proprio è la via più liscia; senza, Google
+   può comunque lasciarti pubblicare ma mostra l'avviso «app non verificata» agli studenti. I menu di Google cambiano spesso:
+   se un campo non c'è, cerca il suo nome con la barra di ricerca.
+8. Se Google ti chiede di verificare la proprietà del dominio, usa **Search Console** (<https://search.google.com/search-console>): aggiungi il dominio e copia il record DNS che ti mostra nel sito dove hai comprato il dominio.
+
+> **Prima di pubblicare** apri `/privacy` e `/termini` sul sito: i campi gialli «DA COMPLETARE» (titolare del trattamento,
+> email di contatto) vanno compilati. Google controlla che le pagine si aprano, e gli studenti le leggono.
 
 ### A3. Crea le credenziali
 1. **Client** (o *Credenziali*) → **Crea client** (*Crea credenziali → ID client OAuth*).
