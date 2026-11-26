@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { FeedAutoSync } from "@/components/calendar/feed-auto-sync";
 import { MonthView } from "@/components/calendar/month-view";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getSchoolContext } from "@/lib/data/school-data";
@@ -23,6 +24,7 @@ async function Calendar() {
         <h1 className="text-3xl font-semibold tracking-tight">{getMessages().nav.calendar}</h1>
         <p className="mt-1 text-sm text-muted">{getMessages().calendarPage.intro}</p>
       </div>
+      {!data.isDemo && data.events.some((e) => e.imported) && <FeedAutoSync />}
       <MonthView tasks={data.tasks} events={data.events} subjects={data.subjects} today={today} demo={data.isDemo} />
     </div>
   );

@@ -75,6 +75,7 @@ export const eventFromRow = (e: EventRow): CalendarEvent => ({
   kind: e.kind,
   subjectId: e.subject_id ?? undefined,
   notes: e.notes ?? undefined,
+  imported: e.feed_id ? true : undefined,
 });
 
 export function messageFromRow(m: InboxMessageRow, timeZone: string): InboxMessage {
