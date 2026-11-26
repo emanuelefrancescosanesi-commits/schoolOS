@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
 import { Field } from "@/components/ui/label";
-import { type AverageMethod, type Grade, average, requiredGrade } from "@/lib/domain/averages";
+import { gradeNeededOverTests } from "@/lib/domain/analytics";
+import { type AverageMethod, type Grade, average } from "@/lib/domain/averages";
 import { type GradingScale, formatAverage, formatGrade } from "@/lib/domain/grading";
 import type { Subject } from "@/lib/domain/model";
 import { getMessages } from "@/lib/i18n";
@@ -24,12 +25,13 @@ export function Simulator({ grades, subjects, scale, method }: Props) {
   const [subjectId, setSubjectId] = useState(withGrades[0]?.id ?? "");
   const [target, setTarget] = useState(String(scale.passThreshold));
   const [weight, setWeight] = useState("1");
+  const [tests, setTests] = useState("1");
 
   const list = grades.filter((g) => g.subjectId === subjectId);
   const current = average(list, method);
   const targetNum = Number(target.replace(",", "."));
   const valid = Number.isFinite(targetNum) && targetNum >= scale.min && targetNum <= scale.max;
-  const result = valid && list.length ? requiredGrade(list, targetNum, scale, method, Number(weight)) : null;
+  const result = valid && list.length ? gradeNeededOverTests(list, targetNum, scale, method, Number(tests), Number(weight)) : null;
 
   return (
     <Card aria-labelledby="sim-title">
@@ -54,6 +56,15 @@ export function Simulator({ grades, subjects, scale, method }: Props) {
               <Field label={m.target} htmlFor="sim-target">
                 <Input id="sim-target" inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} />
               </Field>
+              <Field label={m.tests} htmlFor="sim-tests">
+                <Select id="sim-tests" value={tests} onChange={(e) => setTests(e.target.value)}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {m.testsOption(n)}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
               {method === "weighted" && (
                 <Field label={m.weight} htmlFor="sim-weight">
                   <Select id="sim-weight" value={weight} onChange={(e) => setWeight(e.target.value)}>
@@ -75,7 +86,9 @@ export function Simulator({ grades, subjects, scale, method }: Props) {
                 : result?.status === "reached"
                   ? m.reached
                   : result?.status === "reachable"
-                    ? m.reachable(formatGrade(result.value, scale))
+                    ? Number(tests) === 1
+                      ? m.reachable(formatGrade(result.value, scale))
+                      : m.reachableMany(formatGrade(result.value, scale), Number(tests))
                     : result?.status === "unreachable"
                       ? m.unreachable(formatAverage(result.best))
                       : null}

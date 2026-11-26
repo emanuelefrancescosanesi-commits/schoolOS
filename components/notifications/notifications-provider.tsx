@@ -74,7 +74,8 @@ export function useNotifications(): Value {
 export function NotificationsSync({ ids, readIds }: { ids: string[]; readIds: string[] }) {
   const { sync } = useNotifications();
   const key = `${ids.join("|")}#${readIds.join("|")}`;
-  // biome-ignore lint/correctness/useExhaustiveDependencies: key riassume ids e readIds
+  // `key` riassume ids e readIds: evita di risincronizzare a ogni render per via di nuovi array.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => sync(ids, readIds), [key, sync]);
   return null;
 }

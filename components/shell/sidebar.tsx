@@ -3,6 +3,7 @@
 import { PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UnreadBadge, UnreadSrText } from "@/components/notifications/bell-badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSidebarCollapsed } from "@/hooks/use-preferences";
 import { getMessages } from "@/lib/i18n";
@@ -82,6 +83,12 @@ function SidebarLink({ item, label, active }: { item: NavItem; label: string; ac
           {active && <span aria-hidden className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-accent" />}
           <Icon strokeWidth={1.5} className={cn("size-[18px] shrink-0", active && "text-accent-text")} />
           <span className="truncate sidebar-collapsed:sr-only">{label}</span>
+          {item.key === "notifications" && (
+            <>
+              <UnreadSrText />
+              <UnreadBadge className="ml-auto sidebar-collapsed:absolute sidebar-collapsed:top-0.5 sidebar-collapsed:right-0.5 sidebar-collapsed:size-2 sidebar-collapsed:min-w-0 sidebar-collapsed:p-0 sidebar-collapsed:text-[0px]" />
+            </>
+          )}
         </Link>
       </TooltipTrigger>
       {/* Il tooltip serve solo a barra compressa, quando l'etichetta non si vede. */}

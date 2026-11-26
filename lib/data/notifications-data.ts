@@ -31,8 +31,9 @@ export const getNotificationState = cache(async (): Promise<NotificationState> =
       .from("notification_reads")
       .select("reminder_id")
       .in("reminder_id", reminders.map((r) => r.id));
-    if (error) throw new Error(error.message);
-    readIds = rows.map((r) => r.reminder_id);
+    // Migrazione non ancora applicata: i promemoria si vedono, solo non si possono segnare come letti.
+    if (error && error.code !== "PGRST205" && error.code !== "42P01") throw new Error(error.message);
+    readIds = (rows ?? []).map((r) => r.reminder_id);
   }
   return { reminders, readIds, allOff };
 });

@@ -4,6 +4,7 @@ import { EllipsisIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { UnreadBadge, UnreadSrText } from "@/components/notifications/bell-badge";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { getMessages } from "@/lib/i18n";
 import { MOBILE_ITEMS, NAV_GROUPS, NAV_ITEMS, isActive } from "@/lib/navigation";
@@ -49,8 +50,12 @@ export function MobileNav({ account }: { account?: React.ReactNode }) {
                 moreActive ? "text-accent-text" : "text-muted hover:text-fg",
               )}
             >
-              <EllipsisIcon strokeWidth={moreActive ? 2 : 1.5} className="size-5" />
+              <span className="relative">
+                <EllipsisIcon strokeWidth={moreActive ? 2 : 1.5} className="size-5" />
+                <UnreadBadge className="absolute -top-1.5 -right-2.5" />
+              </span>
               <span className={cn(moreActive && "font-medium")}>{m.nav.more}</span>
+              <UnreadSrText />
             </SheetTrigger>
             <SheetContent closeLabel={m.common.close} className="px-4 pt-4 pb-6">
               <SheetTitle className="px-2 pb-1 text-base font-semibold">{m.nav.moreTitle}</SheetTitle>
@@ -75,6 +80,12 @@ export function MobileNav({ account }: { account?: React.ReactNode }) {
                           >
                             <Icon strokeWidth={1.5} className={cn("size-[18px]", active && "text-accent-text")} />
                             {m.nav[item.key]}
+                            {item.key === "notifications" && (
+                              <>
+                                <UnreadSrText />
+                                <UnreadBadge className="ml-auto" />
+                              </>
+                            )}
                           </Link>
                         </li>
                       );
