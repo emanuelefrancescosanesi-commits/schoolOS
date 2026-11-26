@@ -1,12 +1,11 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { authErrorMessage } from "./errors";
-import { resolveSiteOrigin } from "./origin";
+import { siteOrigin } from "./site-origin";
 import { safeNextPath } from "./redirect";
 
 export interface AuthFormState {
@@ -27,19 +26,6 @@ const password = z
 const NOT_CONFIGURED: AuthFormState = {
   error: "L'accesso non è ancora attivo: Supabase non è configurato. Puoi esplorare l'app in modalità demo.",
 };
-
-/** Origine pubblica del sito, per i link nelle email e il ritorno da Google (vedi origin.ts). */
-async function siteOrigin(): Promise<string> {
-  const h = await headers();
-  return resolveSiteOrigin({
-    configured: process.env.NEXT_PUBLIC_SITE_URL,
-    vercelProductionHost: process.env.VERCEL_PROJECT_PRODUCTION_URL,
-    vercelDeployHost: process.env.VERCEL_URL,
-    host: h.get("x-forwarded-host") ?? h.get("host"),
-    proto: h.get("x-forwarded-proto"),
-    production: process.env.NODE_ENV === "production",
-  });
-}
 
 export async function signInWithPassword(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   if (!isSupabaseConfigured()) return NOT_CONFIGURED;
